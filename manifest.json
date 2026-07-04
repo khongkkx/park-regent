@@ -1,0 +1,19 @@
+{
+  "name": "Park Regent Unit Finder",
+  "short_name": "Park Regent",
+  "description": "3D interactive unit finder for Park Regent, Desa ParkCity",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#cfe3ec",
+  "theme_color": "#cfe3ec",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["utilities", "real-estate"]
+}

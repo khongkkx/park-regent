@@ -138,6 +138,73 @@
   }
   .addListingBtn:hover{background:rgba(194,110,96,.05);border-style:solid;}
 
+  /* ===== LISTING CARD PHOTO BUTTON ===== */
+  .lcPhotoBtn{
+    width:100%;margin-top:7px;background:rgba(194,110,96,.07);border:1px solid rgba(194,110,96,.25);
+    color:var(--clay);font-size:9.5px;font-weight:700;padding:5px 8px;border-radius:7px;cursor:pointer;
+    display:flex;align-items:center;gap:5px;text-align:left;transition:background .15s;
+  }
+  .lcPhotoBtn:hover{background:rgba(194,110,96,.14);}
+
+  /* ===== CANVAS GALLERY PANEL ===== */
+  #galleryPanel{
+    position:fixed;
+    left:calc(var(--sidebar-w) + 16px);
+    top:50%;transform:translateY(-50%);
+    z-index:15;
+    width:min(380px, calc(100vw - var(--sidebar-w) - 32px));
+    background:var(--paper);
+    border-radius:16px;
+    box-shadow:0 8px 36px rgba(40,30,25,.28);
+    display:none;
+    flex-direction:column;
+    overflow:hidden;
+    max-height:80vh;
+  }
+  #galleryPanel.open{display:flex;}
+  #galleryHeader{
+    padding:12px 14px 10px;
+    border-bottom:1px solid rgba(58,51,48,.08);
+    display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
+  }
+  #galleryTitle{font-family:Georgia,serif;font-size:14px;font-weight:700;color:var(--ink);}
+  #gallerySubtitle{font-size:9.5px;color:#8a7f79;margin-top:1px;}
+  #galleryClose{background:none;border:none;cursor:pointer;font-size:16px;color:#9a8f89;padding:2px 6px;border-radius:6px;line-height:1;}
+  #galleryClose:hover{background:rgba(194,110,96,.1);color:var(--clay);}
+  #galleryImgWrap{
+    position:relative;background:#1a1614;flex-shrink:0;
+    height:240px;display:flex;align-items:center;justify-content:center;overflow:hidden;
+  }
+  #galleryImg{
+    width:100%;height:100%;object-fit:contain;display:block;
+    transition:opacity .2s;
+  }
+  #galleryPlaceholder{
+    display:none;flex-direction:column;align-items:center;justify-content:center;
+    color:#6d635d;font-size:11px;gap:8px;
+  }
+  #galleryPlaceholder .gpIcon{font-size:36px;opacity:.4;}
+  .galleryNav{
+    position:absolute;top:50%;transform:translateY(-50%);
+    background:rgba(0,0,0,.45);border:none;color:#fff;
+    font-size:18px;width:36px;height:36px;border-radius:50%;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;transition:background .15s;
+  }
+  .galleryNav:hover{background:rgba(0,0,0,.7);}
+  #galleryPrev{left:8px;}
+  #galleryNext{right:8px;}
+  #galleryCounter{
+    position:absolute;bottom:8px;right:10px;
+    background:rgba(0,0,0,.5);color:#fff;font-size:9px;font-weight:600;
+    padding:2px 8px;border-radius:20px;
+  }
+  #galleryDots{
+    display:flex;gap:5px;justify-content:center;padding:10px 14px 0;flex-wrap:wrap;flex-shrink:0;
+  }
+  .gDot{width:7px;height:7px;border-radius:50%;background:#d8cec7;cursor:pointer;transition:background .15s,transform .15s;border:none;padding:0;}
+  .gDot.on{background:var(--clay);transform:scale(1.25);}
+  #galleryDesc{font-size:9.5px;color:#6d635d;padding:10px 14px 14px;line-height:1.55;flex-shrink:0;}
+
   /* ===== SIDEBAR TOGGLE BUTTON ===== */
   #sidebarToggle{
     position:fixed;top:calc(16px + var(--safe-top));left:calc(16px + var(--safe-left));z-index:22;
@@ -349,6 +416,29 @@
   </div><!-- /sidebarScroll -->
 </div><!-- /sidebar -->
 
+
+<!-- CANVAS GALLERY PANEL -->
+<div id="galleryPanel">
+  <div id="galleryHeader">
+    <div>
+      <div id="galleryTitle">PR/A/5/1</div>
+      <div id="gallerySubtitle">For Sale · RM 1,000,000</div>
+    </div>
+    <button id="galleryClose">✕</button>
+  </div>
+  <div id="galleryImgWrap">
+    <img id="galleryImg" src="" alt="Unit photo">
+    <div id="galleryPlaceholder">
+      <span class="gpIcon">🏠</span>
+      <span>No photos yet</span>
+    </div>
+    <button class="galleryNav" id="galleryPrev">‹</button>
+    <button class="galleryNav" id="galleryNext">›</button>
+    <div id="galleryCounter">1 / 1</div>
+  </div>
+  <div id="galleryDots"></div>
+  <div id="galleryDesc"></div>
+</div>
 
 <div id="compass"><div id="needle">N</div></div>
 <div id="legend">
@@ -909,29 +999,115 @@ function buildCard(row){
   var unitRaw=(row.unit||'').trim();
   var price=(row.price||'').trim();
   var extraDesc=(row.desc||'').trim();
+  var photoRaw=(row.photo||'').trim();
+  // Support comma-separated multiple photo URLs
+  var photos=photoRaw?photoRaw.split(',').map(function(u){return u.trim();}).filter(Boolean):[];
   if(!unitRaw||!price||(section!=='sale'&&section!=='rent'))return null;
   var parsed=parseUnitCode(unitRaw);if(!parsed)return null;
   var tower=parsed.tower,lvl=parsed.lvl,stack=parsed.stack;
   var isSale=section==='sale';
   var displayUnit='PR/'+tower+'/'+lvl+(stack?'/'+stack:'');
   var desc=autoDesc(tower,lvl,stack);
-  var extraDesc=(row.desc||'').trim();
   var card=document.createElement('div');
   card.className='listingCard';
   card.dataset.tower=tower;card.dataset.lvl=lvl;
   if(stack)card.dataset.stack=stack;
+
+  var photoBtnHtml=photos.length>0||extraDesc
+    ?'<button class="lcPhotoBtn" type="button">📷 View Photos'+(photos.length>1?' ('+photos.length+')':'')+'</button>'
+    :'';
+
   card.innerHTML='<div class="lcClickArea">'+
     '<div class="lcUnit">'+displayUnit+'</div>'+
     (desc?'<div class="lcSub">'+desc+'</div>':'')+
-    (extraDesc?'<div class="lcExtraDesc">'+extraDesc+'</div>':'')+
     '<div class="lcPrice">'+price+'</div>'+
     '<span class="lcBadge '+(isSale?'lcBadgeSale':'lcBadgeRent')+'">'+(isSale?'For Sale':'For Rent')+'</span>'+
-    '</div>';
+    '</div>'+photoBtnHtml;
+
   card.querySelector('.lcClickArea').addEventListener('click',function(){
     if(tower&&lvl&&stack){var ok=jumpToUnit(tower,lvl,stack);if(ok){target.y=Math.min(120,yOf(LI[lvl]));setCam();}}
   });
+
+  if(photoBtnHtml){
+    card.querySelector('.lcPhotoBtn').addEventListener('click',function(e){
+      e.stopPropagation();
+      openGallery(displayUnit,(isSale?'For Sale':'For Rent')+' · '+price,photos,extraDesc);
+    });
+  }
+
   return{card:card,section:section};
 }
+
+/* ===== GALLERY PANEL ===== */
+var galleryPhotos=[],galleryIdx=0;
+var gPanel=document.getElementById('galleryPanel');
+var gImg=document.getElementById('galleryImg');
+var gPlaceholder=document.getElementById('galleryPlaceholder');
+var gTitle=document.getElementById('galleryTitle');
+var gSubtitle=document.getElementById('gallerySubtitle');
+var gCounter=document.getElementById('galleryCounter');
+var gDots=document.getElementById('galleryDots');
+var gDesc=document.getElementById('galleryDesc');
+var gPrev=document.getElementById('galleryPrev');
+var gNext=document.getElementById('galleryNext');
+
+// Placeholder images for testing (picsum gives random room/interior photos)
+var PLACEHOLDERS=[
+  'https://picsum.photos/seed/unit1/800/500',
+  'https://picsum.photos/seed/unit2/800/500',
+  'https://picsum.photos/seed/unit3/800/500'
+];
+
+function openGallery(unitNo,subtitle,photos,desc){
+  galleryPhotos=photos.length>0?photos:PLACEHOLDERS;
+  galleryIdx=0;
+  gTitle.textContent=unitNo;
+  gSubtitle.textContent=subtitle+(photos.length===0?' · ⚠ Placeholder photos':'');
+  gDesc.textContent=desc||'';
+  gDesc.style.display=desc?'block':'none';
+  renderGalleryFrame();
+  gPanel.classList.add('open');
+}
+function renderGalleryFrame(){
+  var total=galleryPhotos.length;
+  var url=galleryPhotos[galleryIdx];
+  if(url){
+    gImg.style.display='block';
+    gPlaceholder.style.display='none';
+    gImg.style.opacity='0';
+    gImg.onload=function(){gImg.style.opacity='1';};
+    gImg.onerror=function(){gImg.style.display='none';gPlaceholder.style.display='flex';};
+    gImg.src=url;
+  }else{
+    gImg.style.display='none';
+    gPlaceholder.style.display='flex';
+  }
+  gCounter.textContent=(galleryIdx+1)+' / '+total;
+  gPrev.style.display=total>1?'flex':'none';
+  gNext.style.display=total>1?'flex':'none';
+  // Dots
+  gDots.innerHTML='';
+  if(total>1&&total<=12){
+    galleryPhotos.forEach(function(_,i){
+      var d=document.createElement('button');
+      d.className='gDot'+(i===galleryIdx?' on':'');
+      d.addEventListener('click',function(){galleryIdx=i;renderGalleryFrame();});
+      gDots.appendChild(d);
+    });
+  }
+  gDots.style.display=(total>1&&total<=12)?'flex':'none';
+}
+gPrev.addEventListener('click',function(){
+  galleryIdx=(galleryIdx-1+galleryPhotos.length)%galleryPhotos.length;
+  renderGalleryFrame();
+});
+gNext.addEventListener('click',function(){
+  galleryIdx=(galleryIdx+1)%galleryPhotos.length;
+  renderGalleryFrame();
+});
+document.getElementById('galleryClose').addEventListener('click',function(){
+  gPanel.classList.remove('open');
+});
 async function fetchListings(){
   try{
     var res=await fetch(SHEET_CSV+'&nc='+Date.now());

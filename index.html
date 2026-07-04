@@ -981,13 +981,24 @@ function autoDesc(tower,lvl,stack){
   if(!u)return'';
   return u.beds+' · '+u.sf.toLocaleString()+' sf<br>Facing: '+u.face;
 }
+function parseCSVLine(line){
+  var result=[],cur='',inQ=false;
+  for(var i=0;i<line.length;i++){
+    var c=line[i];
+    if(c==='"'){if(inQ&&line[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}
+    else if(c===','&&!inQ){result.push(cur.trim().replace(/\r/g,''));cur='';}
+    else cur+=c;
+  }
+  result.push(cur.trim().replace(/\r/g,''));
+  return result;
+}
 function parseCSV(text){
   var lines=text.trim().split('\n');
   if(lines.length<2)return[];
-  var headers=lines[0].split(',').map(h=>h.trim().toLowerCase().replace(/\r/g,''));
+  var headers=parseCSVLine(lines[0]).map(h=>h.toLowerCase());
   var rows=[];
   for(var i=1;i<lines.length;i++){
-    var vals=lines[i].split(',').map(v=>v.trim().replace(/\r/g,''));
+    var vals=parseCSVLine(lines[i]);
     if(!vals[0])continue;
     var row={};headers.forEach((h,idx)=>{row[h]=vals[idx]||'';});
     rows.push(row);

@@ -125,6 +125,7 @@
   }
   .lcBadgeSale{background:#e8f0eb;color:#3a6b45;}
   .lcBadgeRent{background:#e8edf5;color:#2e4d7a;}
+  .lcExtraDesc{font-size:9.5px;font-weight:700;color:#5a7a5e;margin-top:3px;background:#e8f0eb;border-radius:4px;padding:2px 7px;display:inline-block;}
   .lcDeleteBtn{
     position:absolute;top:8px;right:8px;
     background:none;border:none;cursor:pointer;
@@ -907,12 +908,14 @@ function buildCard(row){
   var section=(row.section||'').toLowerCase().trim();
   var unitRaw=(row.unit||'').trim();
   var price=(row.price||'').trim();
+  var extraDesc=(row.desc||'').trim();
   if(!unitRaw||!price||(section!=='sale'&&section!=='rent'))return null;
   var parsed=parseUnitCode(unitRaw);if(!parsed)return null;
   var tower=parsed.tower,lvl=parsed.lvl,stack=parsed.stack;
   var isSale=section==='sale';
   var displayUnit='PR/'+tower+'/'+lvl+(stack?'/'+stack:'');
   var desc=autoDesc(tower,lvl,stack);
+  var extraDesc=(row.desc||'').trim();
   var card=document.createElement('div');
   card.className='listingCard';
   card.dataset.tower=tower;card.dataset.lvl=lvl;
@@ -920,6 +923,7 @@ function buildCard(row){
   card.innerHTML='<div class="lcClickArea">'+
     '<div class="lcUnit">'+displayUnit+'</div>'+
     (desc?'<div class="lcSub">'+desc+'</div>':'')+
+    (extraDesc?'<div class="lcExtraDesc">'+extraDesc+'</div>':'')+
     '<div class="lcPrice">'+price+'</div>'+
     '<span class="lcBadge '+(isSale?'lcBadgeSale':'lcBadgeRent')+'">'+(isSale?'For Sale':'For Rent')+'</span>'+
     '</div>';

@@ -139,8 +139,8 @@
 
   /* ===== SIDEBAR TOGGLE BUTTON ===== */
   #sidebarToggle{
-    position:fixed;top:16px;left:16px;z-index:22;
-    width:38px;height:38px;border-radius:10px;
+    position:fixed;top:calc(16px + var(--safe-top));left:calc(16px + var(--safe-left));z-index:22;
+    width:44px;height:44px;border-radius:10px;
     background:var(--paper);box-shadow:0 3px 12px rgba(40,30,25,.16);
     border:none;cursor:pointer;display:flex;
     align-items:center;justify-content:center;font-size:16px;color:var(--ink);
@@ -156,7 +156,7 @@
   #sidebarHeadToggle:hover{background:rgba(194,110,96,.08);color:var(--clay);}
 
   /* ===== COMPASS ===== */
-  #compass{position:fixed;top:16px;right:12px;z-index:10;width:42px;height:42px;border-radius:50%;
+  #compass{position:fixed;top:calc(16px + var(--safe-top));right:calc(12px + var(--safe-right));z-index:10;width:42px;height:42px;border-radius:50%;
     background:var(--paper);box-shadow:0 3px 12px rgba(40,30,25,.14);display:flex;align-items:center;justify-content:center;}
   #needle{font-size:14px;font-weight:700;color:var(--clay);}
   #needle::before{content:"▲";display:block;text-align:center;font-size:9px;line-height:5px;}
@@ -247,7 +247,7 @@
     .chip{font-size:8px;padding:3px 7px;}
     #unitPanel{width:min(230px,58vw);padding:10px 12px;}
     #unitPanel .uno{font-size:14px;}
-    #compass{top:max(12px,env(safe-area-inset-top));}
+    #compass{top:calc(16px + env(safe-area-inset-top,0px));right:calc(12px + env(safe-area-inset-right,0px));}
     #exitView{bottom:max(16px,env(safe-area-inset-bottom));}
   }
   @media (min-width:701px){
@@ -619,10 +619,11 @@ el.addEventListener('pointerup',e=>{
   if(drag&&!inView&&Math.hypot(e.clientX-dx0,e.clientY-dy0)<6)pick(e.clientX,e.clientY);
   drag=false;});
 el.addEventListener('wheel',e=>{if(inView)return;e.preventDefault();radius*=(1+e.deltaY*0.001);setCam();},{passive:false});
+el.addEventListener('touchstart',e=>{if(e.touches.length>=2){drag=false;pinch=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);}},{passive:true});
 el.addEventListener('touchmove',e=>{if(inView)return;
   if(e.touches.length===2){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
     if(pinch)radius*=pinch/d;pinch=d;drag=false;setCam();}},{passive:true});
-el.addEventListener('touchend',()=>pinch=0);
+el.addEventListener('touchend',e=>{if(e.touches.length<2)pinch=0;});
 /* ===== UNIT PANEL ===== */
 const uP=document.getElementById('unitPanel'),
   uStackHead=document.getElementById('uStackHead'),

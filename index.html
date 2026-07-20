@@ -138,36 +138,72 @@
   }
   .addListingBtn:hover{background:rgba(194,110,96,.05);border-style:solid;}
 
-  /* ===== LISTING PHOTO EXPAND ===== */
-  .lcExpandBtn{
-    width:100%;margin-top:7px;background:none;border:1px solid #e6ddd4;
-    color:#8a7f79;font-size:9.5px;font-weight:600;padding:5px 8px;border-radius:7px;cursor:pointer;
-    display:flex;align-items:center;justify-content:between;gap:5px;
-    text-align:left;transition:background .15s,border-color .15s;
+  /* ===== LISTING CARD PHOTO BUTTON ===== */
+  .lcPhotoBtn{
+    width:100%;margin-top:7px;background:rgba(194,110,96,.07);border:1px solid rgba(194,110,96,.25);
+    color:var(--clay);font-size:9.5px;font-weight:700;padding:5px 8px;border-radius:7px;cursor:pointer;
+    display:flex;align-items:center;gap:5px;text-align:left;transition:background .15s;
   }
-  .lcExpandBtn:hover{background:rgba(194,110,96,.05);border-color:var(--clay);color:var(--clay);}
-  .lcExpandBtn .lcExpandChev{margin-left:auto;font-size:8px;transition:transform .2s;}
-  .lcExpandBtn.open .lcExpandChev{transform:rotate(180deg);}
-  .lcPhotoPanel{display:none;margin-top:8px;}
-  .lcPhotoPanel.open{display:block;}
-  .lcPhoto{width:100%;border-radius:7px;object-fit:cover;max-height:160px;display:block;background:#f0ebe5;}
-  .lcPhotoPlaceholder{width:100%;height:100px;border-radius:7px;background:#f0ebe5;display:flex;align-items:center;justify-content:center;font-size:9px;color:#9a8f89;}
-  .lcPhotoDesc{font-size:9.5px;color:#6d635d;margin-top:6px;line-height:1.5;}
-  .lcPhoto{height:180px;object-fit:cover;cursor:zoom-in;}
-  .lcGallery{position:relative;width:100%;border-radius:7px;overflow:hidden;background:#000;}
-  .lcGallery img{width:100%;height:180px;display:block;border-radius:7px;object-fit:cover;cursor:zoom-in;}
-  .lcGalleryNav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.45);color:#fff;border:none;font-size:16px;padding:4px 9px;cursor:pointer;border-radius:4px;z-index:2;}
-  .lcGalleryNav:hover{background:rgba(0,0,0,.7);}
-  .lcGalleryPrev{left:4px;}
-  .lcGalleryNext{right:4px;}
-  .lcGalleryDots{display:flex;justify-content:center;gap:5px;margin-top:5px;}
-  .lcGalleryDots span{width:6px;height:6px;border-radius:50%;background:#d0c8c2;cursor:pointer;}
-  .lcGalleryDots span.on{background:var(--clay);}
-  .lcGalleryCount{position:absolute;bottom:6px;right:8px;font-size:9px;color:#fff;background:rgba(0,0,0,.45);padding:2px 6px;border-radius:10px;}
-  #lightboxBg{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.88);display:none;align-items:center;justify-content:center;cursor:zoom-out;}
-  #lightboxBg.open{display:flex;}
-  #lightboxImg{max-width:92vw;max-height:88vh;border-radius:10px;object-fit:contain;box-shadow:0 8px 48px rgba(0,0,0,.6);}
-  #lightboxClose{position:absolute;top:16px;right:20px;color:#fff;font-size:28px;background:none;border:none;cursor:pointer;line-height:1;z-index:201;}
+  .lcPhotoBtn:hover{background:rgba(194,110,96,.14);}
+
+  /* ===== CANVAS GALLERY PANEL ===== */
+  #galleryPanel{
+    position:fixed;
+    left:calc(var(--sidebar-w) + 16px);
+    top:50%;transform:translateY(-50%);
+    z-index:15;
+    width:min(380px, calc(100vw - var(--sidebar-w) - 32px));
+    background:var(--paper);
+    border-radius:16px;
+    box-shadow:0 8px 36px rgba(40,30,25,.28);
+    display:none;
+    flex-direction:column;
+    overflow:hidden;
+    max-height:80vh;
+  }
+  #galleryPanel.open{display:flex;}
+  #galleryHeader{
+    padding:12px 14px 10px;
+    border-bottom:1px solid rgba(58,51,48,.08);
+    display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
+  }
+  #galleryTitle{font-family:Georgia,serif;font-size:14px;font-weight:700;color:var(--ink);}
+  #gallerySubtitle{font-size:9.5px;color:#8a7f79;margin-top:1px;}
+  #galleryClose{background:none;border:none;cursor:pointer;font-size:16px;color:#9a8f89;padding:2px 6px;border-radius:6px;line-height:1;}
+  #galleryClose:hover{background:rgba(194,110,96,.1);color:var(--clay);}
+  #galleryImgWrap{
+    position:relative;background:#1a1614;flex-shrink:0;
+    height:240px;display:flex;align-items:center;justify-content:center;overflow:hidden;
+  }
+  #galleryImg{
+    width:100%;height:100%;object-fit:contain;display:block;
+    transition:opacity .2s;
+  }
+  #galleryPlaceholder{
+    display:none;flex-direction:column;align-items:center;justify-content:center;
+    color:#6d635d;font-size:11px;gap:8px;
+  }
+  #galleryPlaceholder .gpIcon{font-size:36px;opacity:.4;}
+  .galleryNav{
+    position:absolute;top:50%;transform:translateY(-50%);
+    background:rgba(0,0,0,.45);border:none;color:#fff;
+    font-size:18px;width:36px;height:36px;border-radius:50%;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;transition:background .15s;
+  }
+  .galleryNav:hover{background:rgba(0,0,0,.7);}
+  #galleryPrev{left:8px;}
+  #galleryNext{right:8px;}
+  #galleryCounter{
+    position:absolute;bottom:8px;right:10px;
+    background:rgba(0,0,0,.5);color:#fff;font-size:9px;font-weight:600;
+    padding:2px 8px;border-radius:20px;
+  }
+  #galleryDots{
+    display:flex;gap:5px;justify-content:center;padding:10px 14px 0;flex-wrap:wrap;flex-shrink:0;
+  }
+  .gDot{width:7px;height:7px;border-radius:50%;background:#d8cec7;cursor:pointer;transition:background .15s,transform .15s;border:none;padding:0;}
+  .gDot.on{background:var(--clay);transform:scale(1.25);}
+  #galleryDesc{font-size:9.5px;color:#6d635d;padding:10px 14px 14px;line-height:1.55;flex-shrink:0;}
 
   /* ===== SIDEBAR TOGGLE BUTTON ===== */
   #sidebarToggle{
@@ -303,30 +339,6 @@
   </div>
   <div id="sidebarScroll">
 
-    <!-- PROJECT INFO -->
-    <div class="sSection">
-      <button class="sSecHead" data-target="infoBody">
-        <span><span class="sIcon">🏢</span>Project Info</span>
-        <span class="sChevron">▼</span>
-      </button>
-      <div class="sSecBody" id="infoBody">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;margin-top:8px;">
-          <div style="font-size:9px;color:#8a7f79;font-weight:700;text-transform:uppercase;letter-spacing:.1em;">VP Year</div>
-          <div style="font-size:11px;color:var(--ink);font-weight:600;">2023</div>
-          <div style="font-size:9px;color:#8a7f79;font-weight:700;text-transform:uppercase;letter-spacing:.1em;">Site Area</div>
-          <div style="font-size:11px;color:var(--ink);font-weight:600;">5.61 acres</div>
-          <div style="font-size:9px;color:#8a7f79;font-weight:700;text-transform:uppercase;letter-spacing:.1em;">Total Units</div>
-          <div style="font-size:11px;color:var(--ink);font-weight:600;">505 units</div>
-          <div style="font-size:9px;color:#8a7f79;font-weight:700;text-transform:uppercase;letter-spacing:.1em;">Floors</div>
-          <div style="font-size:11px;color:var(--ink);font-weight:600;">53 storeys</div>
-          <div style="font-size:9px;color:#8a7f79;font-weight:700;text-transform:uppercase;letter-spacing:.1em;">Tenure</div>
-          <div style="font-size:11px;color:var(--ink);font-weight:600;">Freehold</div>
-          <div style="font-size:9px;color:#8a7f79;font-weight:700;text-transform:uppercase;letter-spacing:.1em;">Location</div>
-          <div style="font-size:11px;color:var(--ink);font-weight:600;">Desa ParkCity</div>
-        </div>
-      </div>
-    </div>
-
     <!-- SCENE CONTROLS -->
     <div class="sSection">
       <button class="sSecHead" data-target="sceneBody">
@@ -379,36 +391,6 @@
       </div>
     </div>
 
-    <!-- FACILITIES & AMENITIES -->
-    <div class="sSection">
-      <button class="sSecHead" data-target="amenBody">
-        <span><span class="sIcon">🏊</span>Facilities &amp; Amenities</span>
-        <span class="sChevron">▼</span>
-      </button>
-      <div class="sSecBody" id="amenBody">
-        <div class="amenGroup" style="margin-top:10px;">
-          <div class="amenGroupTitle" style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--clay);margin-bottom:6px;">Common Facilities</div>
-          <div class="amenRow" style="display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid #eef2f6;font-size:10px;color:var(--ink);line-height:1.4;"><div style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--clay);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;">1</div><span>Spring Garden</span></div>
-          <div class="amenRow" style="display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid #eef2f6;font-size:10px;color:var(--ink);line-height:1.4;"><div style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--clay);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;">2</div><span>BBQ Pavilion</span></div>
-          <div class="amenRow" style="display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid #eef2f6;font-size:10px;color:var(--ink);line-height:1.4;"><div style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--clay);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;">3</div><span>Herb Garden</span></div>
-          <div class="amenRow" style="display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid #eef2f6;font-size:10px;color:var(--ink);line-height:1.4;"><div style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--clay);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;">4</div><span>Scented Walk</span></div>
-          <div class="amenRow" style="display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid #eef2f6;font-size:10px;color:var(--ink);line-height:1.4;"><div style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--clay);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;">5</div><span>Multiplay Court</span></div>
-          <div class="amenRow" style="display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid #eef2f6;font-size:10px;color:var(--ink);line-height:1.4;"><div style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--clay);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;">6</div><span>Playground</span></div>
-          <div class="amenRow" style="display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid #eef2f6;font-size:10px;color:var(--ink);line-height:1.4;"><div style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--clay);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;">7</div><span>Infinity Pool</span></div>
-          <div class="amenRow" style="display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid #eef2f6;font-size:10px;color:var(--ink);line-height:1.4;"><div style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--clay);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;">8</div><span>Jacuzzi</span></div>
-          <div class="amenRow" style="display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid #eef2f6;font-size:10px;color:var(--ink);line-height:1.4;"><div style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--clay);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;">9</div><span>Kids Pool</span></div>
-          <div class="amenRow" style="display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid #eef2f6;font-size:10px;color:var(--ink);line-height:1.4;"><div style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--clay);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;">10</div><span>Mini Theatre</span></div>
-          <div class="amenRow" style="display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid #eef2f6;font-size:10px;color:var(--ink);line-height:1.4;"><div style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--clay);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;">11</div><span>Resident Club</span></div>
-          <div class="amenRow" style="display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid #eef2f6;font-size:10px;color:var(--ink);line-height:1.4;"><div style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--clay);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;">12</div><span>Gym</span></div>
-          <div class="amenRow" style="display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid #eef2f6;font-size:10px;color:var(--ink);line-height:1.4;"><div style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--clay);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;">13</div><span>Private Dining</span></div>
-          <div class="amenRow" style="display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid #eef2f6;font-size:10px;color:var(--ink);line-height:1.4;"><div style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--clay);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;">14</div><span>Meditation Deck</span></div>
-          <div class="amenRow" style="display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid #eef2f6;font-size:10px;color:var(--ink);line-height:1.4;"><div style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--clay);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;">15</div><span>Multi Purpose Hall</span></div>
-          <div class="amenRow" style="display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid #eef2f6;font-size:10px;color:var(--ink);line-height:1.4;"><div style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--clay);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;">16</div><span>Game Simulator</span></div>
-          <div class="amenRow" style="display:flex;align-items:flex-start;gap:7px;padding:5px 0;font-size:10px;color:var(--ink);line-height:1.4;"><div style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--clay);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;">17</div><span>Grand Waterfall Cascades</span></div>
-        </div>
-      </div>
-    </div>
-
     <!-- AVAILABLE FOR SALE -->
     <div class="sSection">
       <button class="sSecHead" data-target="saleBody">
@@ -435,6 +417,29 @@
 </div><!-- /sidebar -->
 
 
+<!-- CANVAS GALLERY PANEL -->
+<div id="galleryPanel">
+  <div id="galleryHeader">
+    <div>
+      <div id="galleryTitle">PR/A/5/1</div>
+      <div id="gallerySubtitle">For Sale · RM 1,000,000</div>
+    </div>
+    <button id="galleryClose">✕</button>
+  </div>
+  <div id="galleryImgWrap">
+    <img id="galleryImg" src="" alt="Unit photo">
+    <div id="galleryPlaceholder">
+      <span class="gpIcon">🏠</span>
+      <span>No photos yet</span>
+    </div>
+    <button class="galleryNav" id="galleryPrev">‹</button>
+    <button class="galleryNav" id="galleryNext">›</button>
+    <div id="galleryCounter">1 / 1</div>
+  </div>
+  <div id="galleryDots"></div>
+  <div id="galleryDesc"></div>
+</div>
+
 <div id="compass"><div id="needle">N</div></div>
 <div id="legend">
   <div class="chip"><span class="dot" style="background:#e8c07d"></span>A · 1 bed</div>
@@ -457,8 +462,6 @@
 </div>
 <button id="exitView">Exit unit view</button>
 <div id="err">Couldn't load the 3D engine. Check your connection and reopen this file.</div>
-<div id="lightboxBg"><button id="lightboxClose">✕</button><img id="lightboxImg" src="" alt=""></div>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 if(!window.THREE){document.getElementById('err').style.display='flex';}
@@ -951,38 +954,6 @@ togBtn.addEventListener('click',toggleSidebar);
 headTogBtn.addEventListener('click',toggleSidebar);
 updateToggleVis();
 
-/* ===== LIGHTBOX ===== */
-const lbBg=document.getElementById('lightboxBg');
-const lbImg=document.getElementById('lightboxImg');
-let lbPhotos=[],lbIdx=0;
-document.getElementById('lightboxClose').addEventListener('click',()=>lbBg.classList.remove('open'));
-lbBg.addEventListener('click',e=>{if(e.target===lbBg)lbBg.classList.remove('open');});
-function openLightbox(photos,idx){
-  lbPhotos=photos;lbIdx=idx||0;
-  lbImg.src=lbPhotos[lbIdx];lbBg.classList.add('open');
-  updateLbNav();
-}
-function lbGo(n){lbIdx=(n+lbPhotos.length)%lbPhotos.length;lbImg.src=lbPhotos[lbIdx];updateLbNav();}
-function updateLbNav(){
-  let c=document.getElementById('lbCount');
-  if(lbPhotos.length>1){
-    if(!c){c=document.createElement('div');c.id='lbCount';c.style.cssText='position:absolute;bottom:18px;left:50%;transform:translateX(-50%);color:#fff;font-size:12px;background:rgba(0,0,0,.5);padding:3px 10px;border-radius:20px;z-index:201;';lbBg.appendChild(c);}
-    c.textContent=`${lbIdx+1} / ${lbPhotos.length}`;
-  } else if(c) c.remove();
-  let pp=document.getElementById('lbPrev'),np=document.getElementById('lbNext');
-  if(lbPhotos.length>1){
-    if(!pp){pp=document.createElement('button');pp.id='lbPrev';pp.textContent='‹';pp.style.cssText='position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:36px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:6px;padding:4px 14px;cursor:pointer;z-index:210;';pp.addEventListener('click',e=>{e.stopPropagation();lbGo(lbIdx-1);});lbBg.appendChild(pp);}
-    if(!np){np=document.createElement('button');np.id='lbNext';np.textContent='›';np.style.cssText='position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:36px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:6px;padding:4px 14px;cursor:pointer;z-index:210;';np.addEventListener('click',e=>{e.stopPropagation();lbGo(lbIdx+1);});lbBg.appendChild(np);}
-    pp.style.display=np.style.display='block';
-  } else {
-    if(pp)pp.style.display='none';if(np)np.style.display='none';
-  }
-}
-let lbTX=0;
-lbBg.addEventListener('touchstart',e=>{lbTX=e.touches[0].clientX;},{passive:true});
-lbBg.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-lbTX;if(Math.abs(dx)>40)lbGo(dx<0?lbIdx+1:lbIdx-1);},{passive:true});
-document.addEventListener('keydown',e=>{if(!lbBg.classList.contains('open'))return;if(e.key==='ArrowLeft')lbGo(lbIdx-1);if(e.key==='ArrowRight')lbGo(lbIdx+1);if(e.key==='Escape')lbBg.classList.remove('open');});
-
 /* ===== GOOGLE SHEETS LISTINGS ===== */
 const SHEET_CSV="https://docs.google.com/spreadsheets/d/e/2PACX-1vT0rPrsu_CX8Kp42NNTb898eINQXPF_sxhzKhiM-7js4xnenU6ca1B4UDszUfO62_JpZaxwoXMOPlMw/pub?gid=0&single=true&output=csv";
 function parseUnitCode(code){
@@ -1010,13 +981,24 @@ function autoDesc(tower,lvl,stack){
   if(!u)return'';
   return u.beds+' · '+u.sf.toLocaleString()+' sf<br>Facing: '+u.face;
 }
+function parseCSVLine(line){
+  var result=[],cur='',inQ=false;
+  for(var i=0;i<line.length;i++){
+    var c=line[i];
+    if(c==='"'){if(inQ&&line[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}
+    else if(c===','&&!inQ){result.push(cur.trim().replace(/\r/g,''));cur='';}
+    else cur+=c;
+  }
+  result.push(cur.trim().replace(/\r/g,''));
+  return result;
+}
 function parseCSV(text){
   var lines=text.trim().split('\n');
   if(lines.length<2)return[];
-  var headers=lines[0].split(',').map(h=>h.trim().toLowerCase().replace(/\r/g,''));
+  var headers=parseCSVLine(lines[0]).map(h=>h.toLowerCase());
   var rows=[];
   for(var i=1;i<lines.length;i++){
-    var vals=lines[i].split(',').map(v=>v.trim().replace(/\r/g,''));
+    var vals=parseCSVLine(lines[i]);
     if(!vals[0])continue;
     var row={};headers.forEach((h,idx)=>{row[h]=vals[idx]||'';});
     rows.push(row);
@@ -1028,70 +1010,115 @@ function buildCard(row){
   var unitRaw=(row.unit||'').trim();
   var price=(row.price||'').trim();
   var extraDesc=(row.desc||'').trim();
-  var photoUrl=(row.photo||'').trim();
+  var photoRaw=(row.photo||'').trim();
+  // Support comma-separated multiple photo URLs
+  var photos=photoRaw?photoRaw.split(',').map(function(u){return u.trim();}).filter(Boolean):[];
   if(!unitRaw||!price||(section!=='sale'&&section!=='rent'))return null;
   var parsed=parseUnitCode(unitRaw);if(!parsed)return null;
   var tower=parsed.tower,lvl=parsed.lvl,stack=parsed.stack;
   var isSale=section==='sale';
   var displayUnit='PR/'+tower+'/'+lvl+(stack?'/'+stack:'');
   var desc=autoDesc(tower,lvl,stack);
-  var photos=photoUrl?photoUrl.split('|').map(s=>s.trim()).filter(Boolean):[];
-  var hasExpand=!!(photos.length||extraDesc);
   var card=document.createElement('div');
   card.className='listingCard';
   card.dataset.tower=tower;card.dataset.lvl=lvl;
   if(stack)card.dataset.stack=stack;
 
-  var clickArea=document.createElement('div');clickArea.className='lcClickArea';
-  clickArea.innerHTML='<div class="lcUnit">'+displayUnit+'</div>'+
+  var photoBtnHtml=photos.length>0||extraDesc
+    ?'<button class="lcPhotoBtn" type="button">📷 View Photos'+(photos.length>1?' ('+photos.length+')':'')+'</button>'
+    :'';
+
+  card.innerHTML='<div class="lcClickArea">'+
+    '<div class="lcUnit">'+displayUnit+'</div>'+
     (desc?'<div class="lcSub">'+desc+'</div>':'')+
     '<div class="lcPrice">'+price+'</div>'+
-    '<span class="lcBadge '+(isSale?'lcBadgeSale':'lcBadgeRent')+'">'+(isSale?'For Sale':'For Rent')+'</span>';
-  clickArea.addEventListener('click',function(){
+    '<span class="lcBadge '+(isSale?'lcBadgeSale':'lcBadgeRent')+'">'+(isSale?'For Sale':'For Rent')+'</span>'+
+    '</div>'+photoBtnHtml;
+
+  card.querySelector('.lcClickArea').addEventListener('click',function(){
     if(tower&&lvl&&stack){var ok=jumpToUnit(tower,lvl,stack);if(ok){target.y=Math.min(120,yOf(LI[lvl]));setCam();}}
   });
-  card.appendChild(clickArea);
 
-  if(hasExpand){
-    var expandBtn=document.createElement('button');expandBtn.className='lcExpandBtn';expandBtn.type='button';
-    expandBtn.innerHTML='📷 '+(photos.length>1?photos.length+' photos':'Photos & Details')+'<span class="lcExpandChev">▼</span>';
-    var photoPanel=document.createElement('div');photoPanel.className='lcPhotoPanel';
-
-    if(photos.length===1){
-      var img=document.createElement('img');img.className='lcPhoto';img.src=photos[0];img.alt='Unit photo';img.loading='lazy';
-      img.addEventListener('click',function(){openLightbox(photos,0);});
-      photoPanel.appendChild(img);
-    } else if(photos.length>1){
-      var cur=0;
-      var gallery=document.createElement('div');gallery.className='lcGallery';
-      var gImg=document.createElement('img');gImg.src=photos[0];gImg.alt='Unit photo';gImg.loading='lazy';
-      var prev=document.createElement('button');prev.className='lcGalleryNav lcGalleryPrev';prev.textContent='‹';
-      var next=document.createElement('button');next.className='lcGalleryNav lcGalleryNext';next.textContent='›';
-      var count=document.createElement('div');count.className='lcGalleryCount';count.textContent='1 / '+photos.length;
-      gallery.appendChild(gImg);gallery.appendChild(prev);gallery.appendChild(next);gallery.appendChild(count);
-      var dots=document.createElement('div');dots.className='lcGalleryDots';
-      photos.forEach(function(_,i){var d=document.createElement('span');if(i===0)d.className='on';d.addEventListener('click',function(){goG(i);});dots.appendChild(d);});
-      function goG(n){cur=(n+photos.length)%photos.length;gImg.src=photos[cur];count.textContent=(cur+1)+' / '+photos.length;dots.querySelectorAll('span').forEach(function(d,i){d.className=i===cur?'on':'';});}
-      gImg.addEventListener('click',function(){openLightbox(photos,cur);});
-      prev.addEventListener('click',function(e){e.stopPropagation();goG(cur-1);});
-      next.addEventListener('click',function(e){e.stopPropagation();goG(cur+1);});
-      photoPanel.appendChild(gallery);photoPanel.appendChild(dots);
-    }
-
-    if(extraDesc){var pd=document.createElement('div');pd.className='lcPhotoDesc';pd.textContent=extraDesc;photoPanel.appendChild(pd);}
-    if(!photos.length&&!extraDesc){var ph=document.createElement('div');ph.className='lcPhotoPlaceholder';ph.textContent='No photo';photoPanel.appendChild(ph);}
-
-    expandBtn.addEventListener('click',function(e){
+  if(photoBtnHtml){
+    card.querySelector('.lcPhotoBtn').addEventListener('click',function(e){
       e.stopPropagation();
-      var isOpen=photoPanel.classList.contains('open');
-      photoPanel.classList.toggle('open',!isOpen);
-      expandBtn.classList.toggle('open',!isOpen);
+      openGallery(displayUnit,(isSale?'For Sale':'For Rent')+' · '+price,photos,extraDesc);
     });
-    card.appendChild(expandBtn);card.appendChild(photoPanel);
   }
 
   return{card:card,section:section};
 }
+
+/* ===== GALLERY PANEL ===== */
+var galleryPhotos=[],galleryIdx=0;
+var gPanel=document.getElementById('galleryPanel');
+var gImg=document.getElementById('galleryImg');
+var gPlaceholder=document.getElementById('galleryPlaceholder');
+var gTitle=document.getElementById('galleryTitle');
+var gSubtitle=document.getElementById('gallerySubtitle');
+var gCounter=document.getElementById('galleryCounter');
+var gDots=document.getElementById('galleryDots');
+var gDesc=document.getElementById('galleryDesc');
+var gPrev=document.getElementById('galleryPrev');
+var gNext=document.getElementById('galleryNext');
+
+// Placeholder images for testing (picsum gives random room/interior photos)
+var PLACEHOLDERS=[
+  'https://picsum.photos/seed/unit1/800/500',
+  'https://picsum.photos/seed/unit2/800/500',
+  'https://picsum.photos/seed/unit3/800/500'
+];
+
+function openGallery(unitNo,subtitle,photos,desc){
+  galleryPhotos=photos.length>0?photos:PLACEHOLDERS;
+  galleryIdx=0;
+  gTitle.textContent=unitNo;
+  gSubtitle.textContent=subtitle+(photos.length===0?' · ⚠ Placeholder photos':'');
+  gDesc.textContent=desc||'';
+  gDesc.style.display=desc?'block':'none';
+  renderGalleryFrame();
+  gPanel.classList.add('open');
+}
+function renderGalleryFrame(){
+  var total=galleryPhotos.length;
+  var url=galleryPhotos[galleryIdx];
+  if(url){
+    gImg.style.display='block';
+    gPlaceholder.style.display='none';
+    gImg.style.opacity='0';
+    gImg.onload=function(){gImg.style.opacity='1';};
+    gImg.onerror=function(){gImg.style.display='none';gPlaceholder.style.display='flex';};
+    gImg.src=url;
+  }else{
+    gImg.style.display='none';
+    gPlaceholder.style.display='flex';
+  }
+  gCounter.textContent=(galleryIdx+1)+' / '+total;
+  gPrev.style.display=total>1?'flex':'none';
+  gNext.style.display=total>1?'flex':'none';
+  // Dots
+  gDots.innerHTML='';
+  if(total>1&&total<=12){
+    galleryPhotos.forEach(function(_,i){
+      var d=document.createElement('button');
+      d.className='gDot'+(i===galleryIdx?' on':'');
+      d.addEventListener('click',function(){galleryIdx=i;renderGalleryFrame();});
+      gDots.appendChild(d);
+    });
+  }
+  gDots.style.display=(total>1&&total<=12)?'flex':'none';
+}
+gPrev.addEventListener('click',function(){
+  galleryIdx=(galleryIdx-1+galleryPhotos.length)%galleryPhotos.length;
+  renderGalleryFrame();
+});
+gNext.addEventListener('click',function(){
+  galleryIdx=(galleryIdx+1)%galleryPhotos.length;
+  renderGalleryFrame();
+});
+document.getElementById('galleryClose').addEventListener('click',function(){
+  gPanel.classList.remove('open');
+});
 async function fetchListings(){
   try{
     var res=await fetch(SHEET_CSV+'&nc='+Date.now());

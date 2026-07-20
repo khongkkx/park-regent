@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Park Regent">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="theme-color" content="#cfe3ec">
+<title>Park Regent — Unit Finder 3D</title>
+<style>
+  :root{--clay:#c26e60;--ink:#3a3330;--paper:rgba(250,247,243,.97);--sidebar-w:270px;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px);}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;height:100dvh;overflow:hidden;background:#cfe3ec;font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;overscroll-behavior:none;}
+  canvas{display:block;touch-action:none;}
+
+  /* ===== SIDEBAR ===== */
+  #sidebar{
+    position:fixed;top:0;left:0;height:100%;width:var(--sidebar-w);
+    background:var(--paper);
+    box-shadow:4px 0 24px rgba(40,30,25,.13);
+    z-index:20;
+    display:flex;flex-direction:column;
+    transition:transform .28s cubic-bezier(.4,0,.2,1);
+    overflow:hidden;
+  }
+  #sidebar:not(.open){transform:translateX(calc(-1 * var(--sidebar-w)));}
+  #sidebarHead{
+    padding:20px 18px 14px;
+    border-bottom:1px solid rgba(58,51,48,.08);
+    flex-shrink:0;
+  }
+  #sidebarHead .eyebrow{font-size:9px;letter-spacing:.18em;color:var(--clay);font-weight:700;text-transform:uppercase;}
+  #sidebarHead h1{font-family:Georgia,serif;font-weight:600;font-size:21px;color:var(--ink);margin:2px 0 1px;}
+  #sidebarHead .sub{font-family:Georgia,serif;font-style:italic;font-size:11px;color:#8a7f79;}
+  #sidebarScroll{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:24px;}
+  #sidebarScroll::-webkit-scrollbar{width:4px;}
+  #sidebarScroll::-webkit-scrollbar-thumb{background:rgba(194,110,96,.25);border-radius:2px;}
+
+  /* ===== SIDEBAR SECTIONS ===== */
+  .sSection{border-bottom:1px solid rgba(58,51,48,.07);}
+  .sSecHead{
+    width:100%;background:none;border:none;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:13px 18px;cursor:pointer;
+    font-size:11px;font-weight:700;color:var(--ink);letter-spacing:.04em;text-transform:uppercase;
+    text-align:left;
+  }
+  .sSecHead:hover{background:rgba(194,110,96,.06);}
+  .sSecHead .sIcon{font-size:13px;margin-right:9px;opacity:.7;}
+  .sSecHead .sChevron{font-size:10px;color:#9a8f89;transition:transform .2s;flex-shrink:0;}
+  .sSecHead.open .sChevron{transform:rotate(180deg);}
+  .sSecBody{display:none;padding:0 18px 14px;}
+  .sSecBody.open{display:block;}
+
+  /* ===== SCENE CONTROLS INSIDE SIDEBAR ===== */
+  .sceneRow{display:flex;gap:5px;margin-top:8px;}
+  .sceneRow button{
+    flex:1;border:1px solid #d8cec7;background:#fff;color:var(--ink);
+    font-size:10px;font-weight:600;padding:6px 3px;border-radius:8px;cursor:pointer;white-space:nowrap;
+  }
+  .sceneRow button.on{background:var(--clay);border-color:var(--clay);color:#fff;}
+  .sceneHint{font-size:9.5px;color:#6d635d;margin-top:8px;line-height:1.45;}
+
+  /* ===== FIND UNIT SECTION ===== */
+  #uSearch{
+    width:100%;font-size:15px;padding:7px 10px;
+    border:1px solid #d8cec7;border-radius:8px;background:#fff;color:var(--ink);outline:none;
+    margin-top:10px;
+  }
+  #uSearch:focus{border-color:var(--clay);}
+  #uSearchMsg{font-size:9.5px;color:#8a7f79;margin-top:5px;display:none;}
+
+  .filterLabel{font-size:9px;letter-spacing:.12em;color:#8a7f79;font-weight:700;text-transform:uppercase;margin-top:12px;margin-bottom:5px;}
+  .typeGrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-top:0;}
+  .typeChip{
+    border:1px solid #d8cec7;background:#fff;color:var(--ink);
+    font-size:9.5px;font-weight:600;padding:5px 4px;border-radius:7px;cursor:pointer;
+    display:flex;align-items:center;gap:4px;white-space:nowrap;
+  }
+  .typeChip.on{background:var(--clay);border-color:var(--clay);color:#fff;}
+  .typeChip .tDot{width:7px;height:7px;border-radius:2px;flex-shrink:0;}
+  .typeChip.on .tDot{background:rgba(255,255,255,.6)!important;}
+
+  .priceRange{margin-top:0;}
+  .priceRow{display:flex;gap:7px;align-items:center;margin-top:5px;}
+  .priceRow input[type=number]{
+    flex:1;border:1px solid #d8cec7;background:#fff;color:var(--ink);
+    font-size:11px;padding:5px 8px;border-radius:7px;outline:none;min-width:0;
+    -moz-appearance:textfield;
+  }
+  .priceRow input[type=number]::-webkit-outer-spin-button,
+  .priceRow input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
+  .priceRow input:focus{border-color:var(--clay);}
+  .priceSep{font-size:11px;color:#9a8f89;flex-shrink:0;}
+  .filterBtn{
+    width:100%;margin-top:10px;background:var(--clay);color:#fff;border:none;
+    font-size:10.5px;font-weight:700;padding:8px;border-radius:8px;cursor:pointer;
+  }
+  .filterBtn:hover{opacity:.9;}
+  .clearBtn{
+    width:100%;margin-top:5px;background:none;color:#9a8f89;border:1px solid #d8cec7;
+    font-size:10px;font-weight:600;padding:6px;border-radius:8px;cursor:pointer;
+  }
+  #filterMsg{font-size:9.5px;color:#8a7f79;margin-top:6px;display:none;line-height:1.5;}
+
+  /* ===== LISTING SECTIONS ===== */
+  .listingEmpty{font-size:10px;color:#9a8f89;font-style:italic;padding:4px 0;}
+  .listingCard{
+    background:#fff;border:1px solid #e6ddd4;border-radius:9px;
+    padding:10px 11px;margin-top:8px;
+    transition:border-color .15s,box-shadow .15s;
+    position:relative;
+  }
+  .listingCard:hover{border-color:var(--clay);box-shadow:0 2px 10px rgba(194,110,96,.13);}
+  .listingCard .lcClickArea{cursor:pointer;}
+  .listingCard .lcUnit{font-family:Georgia,serif;font-size:12.5px;font-weight:700;color:var(--ink);}
+  .listingCard .lcSub{font-size:9.5px;color:#6d635d;margin-top:2px;line-height:1.4;}
+  .listingCard .lcPrice{font-size:12px;font-weight:700;color:var(--clay);margin-top:5px;}
+  .listingCard .lcBadge{
+    display:inline-block;font-size:8px;font-weight:700;letter-spacing:.06em;
+    padding:2px 7px;border-radius:20px;margin-top:4px;text-transform:uppercase;
+  }
+  .lcBadgeSale{background:#e8f0eb;color:#3a6b45;}
+  .lcBadgeRent{background:#e8edf5;color:#2e4d7a;}
+  .lcExtraDesc{font-size:9.5px;font-weight:700;color:#5a7a5e;margin-top:3px;background:#e8f0eb;border-radius:4px;padding:2px 7px;display:inline-block;}
+  .lcDeleteBtn{
+    position:absolute;top:8px;right:8px;
+    background:none;border:none;cursor:pointer;
+    font-size:13px;color:#c0b5af;line-height:1;padding:2px 4px;border-radius:5px;
+  }
+  .lcDeleteBtn:hover{color:#c26e60;background:rgba(194,110,96,.09);}
+  .addListingBtn{
+    width:100%;margin-top:8px;background:none;color:var(--clay);border:1.5px dashed rgba(194,110,96,.4);
+    font-size:10px;font-weight:600;padding:7px;border-radius:8px;cursor:pointer;
+  }
+  .addListingBtn:hover{background:rgba(194,110,96,.05);border-style:solid;}
+
+  /* ===== LISTING PHOTO EXPAND ===== */
+  .lcExpandBtn{
+    width:100%;margin-top:7px;background:none;border:1px solid #e6ddd4;
+    color:#8a7f79;font-size:9.5px;font-weight:600;padding:5px 8px;border-radius:7px;cursor:pointer;
+    display:flex;align-items:center;justify-content:between;gap:5px;
+    text-align:left;transition:background .15s,border-color .15s;
+  }
+  .lcExpandBtn:hover{background:rgba(194,110,96,.05);border-color:var(--clay);color:var(--clay);}
+  .lcExpandBtn .lcExpandChev{margin-left:auto;font-size:8px;transition:transform .2s;}
+  .lcExpandBtn.open .lcExpandChev{transform:rotate(180deg);}
+  .lcPhotoPanel{display:none;margin-top:8px;}
+  .lcPhotoPanel.open{display:block;}
+  .lcPhoto{width:100%;border-radius:7px;object-fit:cover;max-height:160px;display:block;background:#f0ebe5;}
+  .lcPhotoPlaceholder{width:100%;height:100px;border-radius:7px;background:#f0ebe5;display:flex;align-items:center;justify-content:center;font-size:9px;color:#9a8f89;}
+  .lcPhotoDesc{font-size:9.5px;color:#6d635d;margin-top:6px;line-height:1.5;}
+  .lcPhoto{height:180px;object-fit:cover;cursor:zoom-in;}
+  .lcGallery{position:relative;width:100%;border-radius:7px;overflow:hidden;background:#000;}
+  .lcGallery img{width:100%;height:180px;display:block;border-radius:7px;object-fit:cover;cursor:zoom-in;}
+  .lcGalleryNav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.45);color:#fff;border:none;font-size:16px;padding:4px 9px;cursor:pointer;border-radius:4px;z-index:2;}
+  .lcGalleryNav:hover{background:rgba(0,0,0,.7);}
+  .lcGalleryPrev{left:4px;}
+  .lcGalleryNext{right:4px;}
+  .lcGalleryDots{display:flex;justify-content:center;gap:5px;margin-top:5px;}
+  .lcGalleryDots span{width:6px;height:6px;border-radius:50%;background:#d0c8c2;cursor:pointer;}
+  .lcGalleryDots span.on{background:var(--clay);}
+  .lcGalleryCount{position:absolute;bottom:6px;right:8px;font-size:9px;color:#fff;background:rgba(0,0,0,.45);padding:2px 6px;border-radius:10px;}
+  #lightboxBg{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.88);display:none;align-items:center;justify-content:center;cursor:zoom-out;}
+  #lightboxBg.open{display:flex;}
+  #lightboxImg{max-width:92vw;max-height:88vh;border-radius:10px;object-fit:contain;box-shadow:0 8px 48px rgba(0,0,0,.6);}
+  #lightboxClose{position:absolute;top:16px;right:20px;color:#fff;font-size:28px;background:none;border:none;cursor:pointer;line-height:1;z-index:201;}
+
+  /* ===== SIDEBAR TOGGLE BUTTON ===== */
+  #sidebarToggle{
+    position:fixed;top:calc(16px + var(--safe-top));left:calc(16px + var(--safe-left));z-index:22;
+    width:44px;height:44px;border-radius:10px;
+    background:var(--paper);box-shadow:0 3px 12px rgba(40,30,25,.16);
+    border:none;cursor:pointer;display:flex;
+    align-items:center;justify-content:center;font-size:16px;color:var(--ink);
+  }
+  /* hide hamburger when sidebar is open (it's inside the header then) */
+  #sidebarHead{position:relative;}
+  #sidebarHeadToggle{
+    position:absolute;top:50%;right:14px;transform:translateY(-50%);
+    background:none;border:none;cursor:pointer;
+    font-size:18px;color:#9a8f89;line-height:1;padding:4px;
+    border-radius:7px;
+  }
+  #sidebarHeadToggle:hover{background:rgba(194,110,96,.08);color:var(--clay);}
+
+  /* ===== COMPASS ===== */
+  #compass{position:fixed;top:calc(16px + var(--safe-top));right:calc(12px + var(--safe-right));z-index:10;width:42px;height:42px;border-radius:50%;
+    background:var(--paper);box-shadow:0 3px 12px rgba(40,30,25,.14);display:flex;align-items:center;justify-content:center;}
+  #needle{font-size:14px;font-weight:700;color:var(--clay);}
+  #needle::before{content:"▲";display:block;text-align:center;font-size:9px;line-height:5px;}
+
+  /* ===== LEGEND ===== */
+  #legend{position:fixed;bottom:12px;left:12px;z-index:10;display:flex;flex-wrap:wrap;gap:5px;max-width:60vw;}
+  .chip{font-size:9px;font-weight:600;color:var(--ink);background:var(--paper);border-radius:20px;padding:4px 9px;
+    display:flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(40,30,25,.10);}
+  .dot{width:8px;height:8px;border-radius:3px;}
+
+  /* ===== UNIT PANEL (popup on click) ===== */
+  #unitPanel{position:fixed;z-index:12;display:none;background:var(--paper);
+    border-radius:14px;padding:14px 16px;box-shadow:0 6px 28px rgba(40,30,25,.28);width:252px;
+    transition:opacity .18s ease,transform .18s ease;pointer-events:auto;}
+  #unitPanel::before{content:'';position:absolute;width:10px;height:10px;background:var(--paper);
+    transform:rotate(45deg);z-index:-1;}
+  #unitPanel.arrow-left::before{left:-5px;top:50%;margin-top:-5px;box-shadow:-3px 3px 6px rgba(40,30,25,.1);}
+  #unitPanel.arrow-right::before{right:-5px;top:50%;margin-top:-5px;box-shadow:3px -3px 6px rgba(40,30,25,.1);}
+  #unitPanel.arrow-top::before{top:-5px;left:50%;margin-left:-5px;box-shadow:-3px -3px 6px rgba(40,30,25,.1);}
+  #unitPanel.arrow-bottom::before{bottom:-5px;left:50%;margin-left:-5px;box-shadow:3px 3px 6px rgba(40,30,25,.1);}
+  #unitPanel .stackhead{font-size:9px;letter-spacing:.12em;color:#8a7f79;font-weight:700;text-transform:uppercase;margin-bottom:4px;}
+  #unitPanel .uno{font-family:Georgia,serif;font-size:16px;font-weight:700;color:var(--ink);}
+  #unitPanel .utype{font-size:10.5px;color:var(--clay);font-weight:700;margin-top:1px;}
+  #unitPanel .udet{font-size:10.5px;color:#6d635d;line-height:1.6;margin-top:6px;}
+  #unitPanel .slider-row{margin-top:10px;}
+  #unitPanel .slider-row input{width:100%;accent-color:var(--clay);}
+  #unitPanel .lvl{font-size:10px;color:#8a7f79;text-align:center;margin-top:2px;}
+  #unitPanel .btns{display:flex;gap:6px;margin-top:10px;}
+  #unitPanel .btns button{flex:1;border:none;font-size:10px;font-weight:700;padding:7px 4px;border-radius:20px;cursor:pointer;}
+  #uView{background:var(--clay);color:#fff;}
+  #uClose{background:#e6ddd4;color:var(--ink);}
+
+  .lbl{position:fixed;z-index:5;transform:translate(-50%,-100%);background:rgba(58,51,48,.82);color:#fff;
+    font-size:9.5px;font-weight:600;padding:3px 8px;border-radius:20px;pointer-events:none;white-space:nowrap;}
+  #exitView{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);z-index:13;display:none;
+    border:none;background:var(--clay);color:#fff;font-size:11px;font-weight:700;padding:9px 22px;border-radius:22px;cursor:pointer;
+    box-shadow:0 6px 18px rgba(40,30,25,.3);}
+  #err{position:fixed;inset:0;display:none;align-items:center;justify-content:center;color:var(--ink);font-size:13px;padding:24px;text-align:center;}
+
+  /* ===== ADD LISTING MODAL ===== */
+  #listingModalBg{
+    position:fixed;inset:0;z-index:50;
+    background:rgba(40,30,25,.45);
+    display:none;align-items:center;justify-content:center;
+    padding:16px;
+  }
+  #listingModalBg.open{display:flex;}
+  #listingModal{
+    background:var(--paper);border-radius:16px;
+    padding:22px 20px 18px;width:100%;max-width:310px;
+    box-shadow:0 12px 48px rgba(40,30,25,.3);
+    position:relative;
+  }
+  #listingModal h2{font-family:Georgia,serif;font-size:17px;color:var(--ink);margin-bottom:14px;}
+  .mRow{margin-bottom:10px;}
+  .mRow label{display:block;font-size:9px;letter-spacing:.1em;font-weight:700;color:#8a7f79;text-transform:uppercase;margin-bottom:4px;}
+  .mRow input,.mRow textarea,.mRow select{
+    width:100%;border:1px solid #d8cec7;background:#fff;color:var(--ink);
+    font-size:12px;padding:7px 10px;border-radius:8px;outline:none;
+    font-family:inherit;
+  }
+  .mRow input:focus,.mRow textarea:focus,.mRow select:focus{border-color:var(--clay);}
+  .mRow textarea{resize:vertical;min-height:54px;}
+  .mRow2col{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+  .mRow2col label{display:block;font-size:9px;letter-spacing:.1em;font-weight:700;color:#8a7f79;text-transform:uppercase;margin-bottom:4px;}
+  .mRow2col input{
+    width:100%;border:1px solid #d8cec7;background:#fff;color:var(--ink);
+    font-size:12px;padding:7px 10px;border-radius:8px;outline:none;
+  }
+  .mRow2col input:focus{border-color:var(--clay);}
+  #modalSave{
+    width:100%;background:var(--clay);color:#fff;border:none;
+    font-size:11px;font-weight:700;padding:9px;border-radius:9px;cursor:pointer;margin-top:4px;
+  }
+  #modalSave:hover{opacity:.9;}
+  #modalCancel{
+    width:100%;background:none;color:#9a8f89;border:1px solid #d8cec7;
+    font-size:10px;font-weight:600;padding:7px;border-radius:8px;cursor:pointer;margin-top:6px;
+  }
+  #modalError{font-size:10px;color:#c26e60;margin-top:6px;display:none;}
+
+  @media (max-width:700px){
+    :root{--sidebar-w:82vw;}
+    #sidebarToggle{display:flex;}
+    #sidebar{transform:translateX(calc(-1 * var(--sidebar-w)));}
+    #sidebar.open{transform:translateX(0);}
+    #legend{bottom:max(10px,env(safe-area-inset-bottom));left:8px;max-width:52vw;gap:4px;}
+    .chip{font-size:8px;padding:3px 7px;}
+    #unitPanel{width:min(230px,58vw);padding:10px 12px;}
+    #unitPanel .uno{font-size:14px;}
+    #compass{top:calc(16px + env(safe-area-inset-top,0px));right:calc(12px + env(safe-area-inset-right,0px));}
+    #exitView{bottom:max(16px,env(safe-area-inset-bottom));}
+  }
+  @media (min-width:701px){
+    #sidebarToggle{display:flex;}
+    #sidebar.open{transform:translateX(0);}
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR TOGGLE -->
+<button id="sidebarToggle" aria-label="Toggle menu">☰</button>
+
+<!-- SIDEBAR -->
+<div id="sidebar" class="open">
+  <div id="sidebarHead">
+    <div class="eyebrow">Desa ParkCity · Unit Finder</div>
+    <h1>Park Regent</h1>
+    <div class="sub">by the water</div>
+    <button id="sidebarHeadToggle" title="Close menu">✕</button>
+  </div>
+  <div id="sidebarScroll">
+
+    <!-- PROJECT INFO -->
+    <div class="sSection">
+      <button class="sSecHead" data-target="infoBody">
+        <span><span class="sIcon">🏢</span>Project Info</span>
+        <span class="sChevron">▼</span>
+      </button>
+      <div class="sSecBody" id="infoBody">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;margin-top:8px;">
+          <div style="font-size:9px;color:#8a7f79;font-weight:700;text-transform:uppercase;letter-spacing:.1em;">VP Year</div>
+          <div style="font-size:11px;color:var(--ink);font-weight:600;">2023</div>
+          <div style="font-size:9px;color:#8a7f79;font-weight:700;text-transform:uppercase;letter-spacing:.1em;">Site Area</div>
+          <div style="font-size:11px;color:var(--ink);font-weight:600;">5.61 acres</div>
+          <div style="font-size:9px;color:#8a7f79;font-weight:700;text-transform:uppercase;letter-spacing:.1em;">Total Units</div>
+          <div style="font-size:11px;color:var(--ink);font-weight:600;">505 units</div>
+          <div style="font-size:9px;color:#8a7f79;font-weight:700;text-transform:uppercase;letter-spacing:.1em;">Floors</div>
+          <div style="font-size:11px;color:var(--ink);font-weight:600;">53 storeys</div>
+          <div style="font-size:9px;color:#8a7f79;font-weight:700;text-transform:uppercase;letter-spacing:.1em;">Tenure</div>
+          <div style="font-size:11px;color:var(--ink);font-weight:600;">Freehold</div>
+          <div style="font-size:9px;color:#8a7f79;font-weight:700;text-transform:uppercase;letter-spacing:.1em;">Location</div>
+          <div style="font-size:11px;color:var(--ink);font-weight:600;">Desa ParkCity</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCENE CONTROLS -->
+    <div class="sSection">
+      <button class="sSecHead" data-target="sceneBody">
+        <span><span class="sIcon">🌤</span>Scene</span>
+        <span class="sChevron">▼</span>
+      </button>
+      <div class="sSecBody" id="sceneBody">
+        <div class="sceneRow">
+          <button id="mAM" class="on">Morning</button><button id="mPM">Afternoon</button><button id="mDK">Dusk</button>
+        </div>
+        <div class="sceneRow">
+          <button id="rotBtn" class="on">⟳ Rotating</button><button id="lblBtn" class="on">Labels</button>
+        </div>
+        <div class="sceneHint">Tap any coloured stack to see unit details. Drag to orbit, pinch to zoom.</div>
+      </div>
+    </div>
+
+    <!-- FIND UNIT -->
+    <div class="sSection">
+      <button class="sSecHead" data-target="findBody">
+        <span><span class="sIcon">🔍</span>Find Unit</span>
+        <span class="sChevron">▼</span>
+      </button>
+      <div class="sSecBody" id="findBody">
+        <input id="uSearch" placeholder="e.g. B/33/6 or A/27/1" autocomplete="off" inputmode="text" autocapitalize="characters">
+        <div id="uSearchMsg"></div>
+
+        <div class="filterLabel">Unit Type</div>
+        <div class="typeGrid">
+          <button class="typeChip on" data-type="A"><span class="tDot" style="background:#e8c07d"></span>A · 1 Bed</button>
+          <button class="typeChip on" data-type="B"><span class="tDot" style="background:#d99a6c"></span>B · 1+S</button>
+          <button class="typeChip on" data-type="C"><span class="tDot" style="background:#c26e60"></span>C · 2+S</button>
+          <button class="typeChip on" data-type="D"><span class="tDot" style="background:#8fa8b8"></span>D · 3 Bed</button>
+          <button class="typeChip on" data-type="E"><span class="tDot" style="background:#7d9b76"></span>E · 3+F</button>
+          <button class="typeChip on" data-type="F"><span class="tDot" style="background:#6b5b73"></span>F · 4+F</button>
+        </div>
+
+        <div class="filterLabel" style="margin-top:13px;">Price Range (RM)</div>
+        <div class="priceRange">
+          <div class="priceRow">
+            <input type="number" id="priceMin" placeholder="Min" min="0" step="10000">
+            <span class="priceSep">–</span>
+            <input type="number" id="priceMax" placeholder="Max" min="0" step="10000">
+          </div>
+        </div>
+
+        <button class="filterBtn" id="applyFilter">Apply Filter</button>
+        <button class="clearBtn" id="clearFilter">Clear Filter</button>
+        <div id="filterMsg"></div>
+      </div>
+    </div>
+
+    <!-- FACILITIES & AMENITIES -->
+    <div class="sSection">
+      <button class="sSecHead" data-target="amenBody">
+        <span><span class="sIcon">🏊</span>Facilities &amp; Amenities</span>
+        <span class="sChevron">▼</span>
+      </button>
+      <div class="sSecBody" id="amenBody">
+        <div class="amenGroup" style="margin-top:10px;">
+          <div class="amenGroupTitle" style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--clay);margin-bottom:6px;">Common Facilities</div>
+          <div class="amenRow" style="display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid #eef2f6;font-size:10px;color:var(--ink);line-height:1.4;"><div style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--clay);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;">1</div><span>Spring Garden</span></div>
+          <div class="amenRow" style="display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid #eef2f6;font-size:10px;color:var(--ink);line-height:1.4;"><div style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--clay);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;">2</div><span>BBQ Pavilion</span></div>
+          <div class="amenRow" style="display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid #eef2f6;font-size:10px;color:var(--ink);line-height:1.4;"><div style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--clay);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;">3</div><span>Herb Garden</span></div>
+          <div class="amenRow" style="display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid #eef2f6;font-size:10px;color:var(--ink);line-height:1.4;"><div style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--clay);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;">4</div><span>Scented Walk</span></div>
+          <div class="amenRow" style="display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid #eef2f6;font-size:10px;color:var(--ink);line-height:1.4;"><div style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--clay);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;">5</div><span>Multiplay Court</span></div>
+          <div class="amenRow" style="display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid #eef2f6;font-size:10px;color:var(--ink);line-height:1.4;"><div style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--clay);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;">6</div><span>Playground</span></div>
+          <div class="amenRow" style="display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid #eef2f6;font-size:10px;color:var(--ink);line-height:1.4;"><div style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--clay);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;">7</div><span>Infinity Pool</span></div>
+          <div class="amenRow" style="display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid #eef2f6;font-size:10px;color:var(--ink);line-height:1.4;"><div style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--clay);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;">8</div><span>Jacuzzi</span></div>
+          <div class="amenRow" style="display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid #eef2f6;font-size:10px;color:var(--ink);line-height:1.4;"><div style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--clay);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;">9</div><span>Kids Pool</span></div>
+          <div class="amenRow" style="display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid #eef2f6;font-size:10px;color:var(--ink);line-height:1.4;"><div style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--clay);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;">10</div><span>Mini Theatre</span></div>
+          <div class="amenRow" style="display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid #eef2f6;font-size:10px;color:var(--ink);line-height:1.4;"><div style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--clay);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;">11</div><span>Resident Club</span></div>
+          <div class="amenRow" style="display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid #eef2f6;font-size:10px;color:var(--ink);line-height:1.4;"><div style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--clay);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;">12</div><span>Gym</span></div>
+          <div class="amenRow" style="display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid #eef2f6;font-size:10px;color:var(--ink);line-height:1.4;"><div style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--clay);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;">13</div><span>Private Dining</span></div>
+          <div class="amenRow" style="display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid #eef2f6;font-size:10px;color:var(--ink);line-height:1.4;"><div style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--clay);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;">14</div><span>Meditation Deck</span></div>
+          <div class="amenRow" style="display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid #eef2f6;font-size:10px;color:var(--ink);line-height:1.4;"><div style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--clay);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;">15</div><span>Multi Purpose Hall</span></div>
+          <div class="amenRow" style="display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid #eef2f6;font-size:10px;color:var(--ink);line-height:1.4;"><div style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--clay);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;">16</div><span>Game Simulator</span></div>
+          <div class="amenRow" style="display:flex;align-items:flex-start;gap:7px;padding:5px 0;font-size:10px;color:var(--ink);line-height:1.4;"><div style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--clay);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;">17</div><span>Grand Waterfall Cascades</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AVAILABLE FOR SALE -->
+    <div class="sSection">
+      <button class="sSecHead" data-target="saleBody">
+        <span><span class="sIcon">🏷️</span>Available for Sale</span>
+        <span class="sChevron">▼</span>
+      </button>
+      <div class="sSecBody" id="saleBody">
+        <div id="saleList"><div class="listingEmpty">Loading...</div></div>
+      </div>
+    </div>
+
+    <!-- AVAILABLE FOR RENT -->
+    <div class="sSection">
+      <button class="sSecHead" data-target="rentBody">
+        <span><span class="sIcon">🔑</span>Available for Rent</span>
+        <span class="sChevron">▼</span>
+      </button>
+      <div class="sSecBody" id="rentBody">
+        <div id="rentList"><div class="listingEmpty">Loading...</div></div>
+      </div>
+    </div>
+
+  </div><!-- /sidebarScroll -->
+</div><!-- /sidebar -->
+
+
+<div id="compass"><div id="needle">N</div></div>
+<div id="legend">
+  <div class="chip"><span class="dot" style="background:#e8c07d"></span>A · 1 bed</div>
+  <div class="chip"><span class="dot" style="background:#d99a6c"></span>B · 1+study</div>
+  <div class="chip"><span class="dot" style="background:#c26e60"></span>C · 2+study</div>
+  <div class="chip"><span class="dot" style="background:#8fa8b8"></span>D · 3 beds</div>
+  <div class="chip"><span class="dot" style="background:#7d9b76"></span>E · 3+family</div>
+  <div class="chip"><span class="dot" style="background:#6b5b73"></span>F · 4+family</div>
+</div>
+<div id="unitPanel">
+  <div class="stackhead" id="uStackHead">Tower A · Stack 1</div>
+  <div class="uno" id="uNo">PR/B/33/1/D4</div>
+  <div class="utype" id="uType">Type D4 · 3 Beds</div>
+  <div class="udet" id="uDet"></div>
+  <div class="slider-row">
+    <input type="range" id="uSlider" min="0" max="10" value="5">
+    <div class="lvl" id="uLvl">Level 33</div>
+  </div>
+  <div class="btns"><button id="uView">View from unit</button><button id="uClose">Close</button></div>
+</div>
+<button id="exitView">Exit unit view</button>
+<div id="err">Couldn't load the 3D engine. Check your connection and reopen this file.</div>
+<div id="lightboxBg"><button id="lightboxClose">✕</button><img id="lightboxImg" src="" alt=""></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+if(!window.THREE){document.getElementById('err').style.display='flex';}
+else (function(){
+"use strict";
+/* ===== UNIT DATA — from official Park Regent Floor Plan PDF (parkregent.com.my) ===== */
+const LEVELS=['5','6','7','8','9','10','11','12','13','13A','15','16','17','18','19','20','21','22','23','23A','25','26','27','28','29','30','31','32','33','33A','35','36','37','38','39','40','41','42','43','43A','45','46','47','48','49','50','51','52','53'];
+const LI={};LEVELS.forEach((l,i)=>LI[l]=i);
+const isVar=l=>l.includes('A')||parseInt(l)%2===0;
+const SIZE={A1:[893,872],A2:[883,872],B1:[1109,1098],B2:[1163,1152],C1:[1475,1464],C2:[1539,1518],
+  C3:[2346,2325],C4:[2346,2325],C5:[2433,2400],D1:[2626,2583],D2:[2562,2519],D3:[2616,2573],
+  D4:[2723,2680],E1:[2960,2928],E2:[3100,3046],F1:[4510,4446],F2:[4887,4812]};
+const BEDS={A:'1 Bed · 1 Bath · Powder',B:'1 Bed + Study',C:'2 Beds + Study',D:'3 Beds + Maid',E:'3 Beds + Family',F:'4 Beds + Family'};
+const PREMIUM=['C3','C4','C5'];
+const SP=['15','16','35','36'];
+const STACKSEQ=['1','2','3','3A','5','6','7','8','9'];
+const FACE_LAKE=[-0.15,-1],FACE_HILL=[0.15,1],FACE_TC=[1,-0.25],FACE_KL=[0.8,0.7];
+const TOWERS={
+ A:{rot:0.12,cx:-46,cz:14,depth:24,face:'Lake, Facilities & Hill',
+   cols:[
+    {k:'E1',w:15,top:'43A',t:l=>'E1',dir:FACE_LAKE},
+    {k:'D1',w:14,top:'42', t:l=>SP.includes(l)?'C3':'D1',dir:FACE_LAKE},
+    {k:'D2',w:13,top:'36', t:l=>'D2',dir:FACE_LAKE},
+    {k:'D3',w:14,top:'33A',t:l=>(l==='15'||l==='16')?'C4':'D3',dir:FACE_HILL}]},
+ B:{rot:-0.16,cx:30,cz:-2,depth:24,face:null,
+   cols:[
+    {k:'D4',w:14,top:'36', t:l=>SP.includes(l)?'C5':'D4',dir:FACE_KL, f:'Lake, Facilities & KL City Centre'},
+    {k:'E2',w:15,top:'36', t:l=>'E2',dir:FACE_HILL, f:'Hills'},
+    {k:'A2',w:9, top:'48', t:l=>'A2',dir:FACE_LAKE, f:'Lake & Facilities'},
+    {k:'A1',w:9, top:'48', t:l=>SP.includes(l)?null:'A1',dir:FACE_LAKE, f:'Lake & Facilities'},
+    {k:'B2',w:9, top:'43A',t:l=>'B2',dir:FACE_LAKE, f:'Lake & Facilities'},
+    {k:'F1',w:17,top:'36', t:l=>'F1',dir:FACE_LAKE, f:'Lake, Facilities & TownCenter'},
+    {k:'B1',w:9, top:'43A',t:l=>'B1',dir:FACE_LAKE, f:'Lake, Facilities & TownCenter'},
+    {k:'C1',w:12,top:'48', t:l=>'C1',dir:FACE_TC, f:'TownCenter'},
+    {k:'C2',w:12,top:'48', t:l=>'C2',dir:FACE_TC, f:'TownCenter'}]}
+};
+const CROWN={f:'Lake, Facilities & KL City Centre',dir:FACE_KL};
+const deckY=12;
+const yOf=li=>deckY+3+li*3.2;
+function colValid(tw,ci){const c=TOWERS[tw].cols[ci];const out=[];
+  for(let i=0;i<=LI[c.top];i++){if(c.t(LEVELS[i]))out.push(i);}return out;}
+const crownValid=(()=>{const o=[];for(let i=LI['37'];i<=LI['53'];i++)o.push(i);return o;})();
+function stackNoOf(tw,colKey,lvl){
+  const li=LI[lvl];let occ=[];
+  if(tw==='A'){TOWERS.A.cols.forEach(c=>{if(li<=LI[c.top]&&c.t(lvl))occ.push(c.k);});}
+  else{
+    if(li>=LI['37'])occ.push('CR');
+    TOWERS.B.cols.forEach((c,i)=>{if(i<2&&li>=LI['37'])return;
+      if(li<=LI[c.top]&&c.t(lvl))occ.push(c.k);});
+  }
+  const idx=occ.indexOf(colKey);return idx<0?null:STACKSEQ[idx];
+}
+function unitInfo(tw,colKey,lvl){
+  let type,face,dir;
+  if(colKey==='CR'){type='F2';face=CROWN.f;dir=CROWN.dir;}
+  else{const c=TOWERS[tw].cols.find(x=>x.k===colKey);type=c.t(lvl);face=(tw==='A')?TOWERS.A.face:c.f;dir=c.dir;}
+  if(!type)return null;
+  const v=isVar(lvl);
+  let sf=SIZE[type][v?1:0];
+  if(lvl==='37'&&type==='F2')sf=5759;
+  const stk=stackNoOf(tw,colKey,lvl);
+  const no='PR/'+tw+'/'+lvl+'/'+stk+'/'+type+(v?'a':'');
+  const cat=type[0];
+  let beds=BEDS[cat];if(PREMIUM.includes(type))beds='2 Beds + Study (Premium)';
+  const lobby=(cat==='D'||cat==='E'||cat==='F'||PREMIUM.includes(type))?' · Private lift lobby':'';
+  return{no,type:type+(v?'a':''),beds:beds+lobby,sf,face,dir,lvl};
+}
+/* ===== SCENE ===== */
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
+document.body.appendChild(renderer.domElement);
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(46,innerWidth/innerHeight,1,2600);
+const target=new THREE.Vector3(0,55,-10);
+let theta=-0.55,phi=1.12,radius=360;
+const hemi=new THREE.HemisphereLight(0xeaf4ff,0x8a9a76,0.95);scene.add(hemi);
+const sun=new THREE.DirectionalLight(0xfff2d8,1.0);scene.add(sun);
+const TYPECOL={A:0xe8c07d,B:0xd99a6c,C:0xc26e60,D:0x8fa8b8,E:0x7d9b76,F:0x6b5b73};
+const slabMat=new THREE.MeshStandardMaterial({color:0xefe9df,roughness:0.85});
+const finMat=new THREE.MeshStandardMaterial({color:0xe4ddd1,roughness:0.8});
+const roofGreen=new THREE.MeshStandardMaterial({color:0x5d8f4e,roughness:1});
+const podiumMat=new THREE.MeshStandardMaterial({color:0xd9d2c6,roughness:0.9});
+const waterMat=new THREE.MeshStandardMaterial({color:0x8fd0dd,roughness:0.25});
+const lakeMat=new THREE.MeshStandardMaterial({color:0x6fb7c9,roughness:0.15});
+const grassMat=new THREE.MeshStandardMaterial({color:0x93b06c,roughness:1});
+const parkMat=new THREE.MeshStandardMaterial({color:0x7fa25c,roughness:1});
+const poolMat=new THREE.MeshStandardMaterial({color:0x63c3d6,roughness:0.2});
+const ground=new THREE.Mesh(new THREE.CircleGeometry(950,48),grassMat);
+ground.rotation.x=-Math.PI/2;scene.add(ground);
+function blob(cx,cz,rx,rz,mat,y){const m=new THREE.Mesh(new THREE.CircleGeometry(1,44),mat);
+  m.scale.set(rx,rz,1);m.rotation.x=-Math.PI/2;m.position.set(cx,y,cz);return m;}
+scene.add(blob(-10,-165,195,95,lakeMat,0.15));
+scene.add(blob(150,-190,80,55,lakeMat,0.15));
+scene.add(blob(-175,-70,120,90,parkMat,0.1));
+scene.add(blob(120,115,90,60,parkMat,0.1));
+const base=new THREE.Mesh(new THREE.BoxGeometry(175,deckY,112),podiumMat);
+base.position.set(0,deckY/2,2);scene.add(base);
+const deckTop=new THREE.Mesh(new THREE.BoxGeometry(171,0.6,108),roofGreen);
+deckTop.position.set(0,deckY+0.3,2);scene.add(deckTop);
+const pool=new THREE.Mesh(new THREE.BoxGeometry(52,0.9,18),poolMat);
+pool.position.set(-14,deckY+0.75,-38);scene.add(pool);
+for(let i=0;i<6;i++){
+  const step=new THREE.Mesh(new THREE.BoxGeometry(96-i*4,2,5),podiumMat);
+  step.position.set(-8,deckY-1-(i*2),-56-(i*5));scene.add(step);
+  const w=new THREE.Mesh(new THREE.BoxGeometry(92-i*4,0.3,4.4),waterMat);
+  w.position.set(-8,deckY-(i*2)+0.05,-56-(i*5));scene.add(w);
+}
+/* ===== TOWERS ===== */
+const pickables=[];
+const SLICE_H=2.85;
+const sliceGeom=new THREE.BoxGeometry(1,SLICE_H,1);
+const colMats={};
+function getColMat(colKey,typeChar){
+  if(!colMats[colKey]){
+    colMats[colKey]=new THREE.MeshStandardMaterial({color:TYPECOL[typeChar],roughness:0.5,metalness:0.08});
+  }
+  return colMats[colKey];
+}
+function buildTower(tw){
+  const T=TOWERS[tw];const g=new THREE.Group();
+  g.position.set(T.cx,0,T.cz);g.rotation.y=T.rot;scene.add(g);
+  const total=T.cols.reduce((s,c)=>s+c.w,0);let x=-total/2;
+  T.cols.forEach((c,ci)=>{
+    const valid=colValid(tw,ci);
+    const h=yOf(valid[valid.length-1])+3.2-deckY;
+    const midType=c.t(LEVELS[valid[Math.floor(valid.length/2)]])||'A1';
+    const mat=getColMat(tw+'_'+c.k,midType[0]);
+    const shell=new THREE.Mesh(new THREE.BoxGeometry(c.w-0.8,h,T.depth),
+      new THREE.MeshStandardMaterial({color:TYPECOL[midType[0]],roughness:0.5,metalness:0.08,transparent:true,opacity:0.18}));
+    shell.position.set(x+c.w/2,deckY+h/2,0);
+    g.add(shell);
+    valid.forEach(li=>{
+      const lvl=LEVELS[li];
+      const typeChar=(c.t(lvl)||midType)[0];
+      const fMat=getColMat(tw+'_'+c.k+'_'+typeChar,typeChar);
+      const sm=new THREE.Mesh(sliceGeom,fMat);
+      sm.scale.set(c.w-0.8,1,T.depth);
+      sm.position.set(x+c.w/2,yOf(li)-1.4+SLICE_H/2+0.36,0);
+      sm.userData={tower:tw,colKey:c.k,li,valid,mat:fMat};
+      g.add(sm);pickables.push(sm);
+    });
+    const n=valid.length;
+    const sl=new THREE.InstancedMesh(new THREE.BoxGeometry(c.w-0.2,0.35,T.depth+1.6),slabMat,n);
+    const m4=new THREE.Matrix4();
+    valid.forEach((li,i)=>{m4.setPosition(x+c.w/2,yOf(li)-1.4,0);sl.setMatrixAt(i,m4);});
+    g.add(sl);
+    const rg=new THREE.Mesh(new THREE.BoxGeometry(c.w-2,0.7,T.depth-3),roofGreen);
+    rg.position.set(x+c.w/2,deckY+h+0.4,0);g.add(rg);
+    c._x=x+c.w/2;x+=c.w;
+  });
+  return g;
+}
+const gA=buildTower('A'),gB=buildTower('B');
+(function(){
+  const c0=TOWERS.B.cols[0],c1=TOWERS.B.cols[1];
+  const w=(c0.w+c1.w)-4,cx=(c0._x+c1._x)/2;
+  const y0=yOf(LI['37'])-1.6,y1=yOf(LI['53'])+3.2;
+  const crownBaseMat=new THREE.MeshStandardMaterial({color:TYPECOL.F,roughness:0.5,metalness:0.08,transparent:true,opacity:0.18});
+  const shell=new THREE.Mesh(new THREE.BoxGeometry(w,y1-y0,22),crownBaseMat);
+  shell.position.set(cx,(y0+y1)/2,0);gB.add(shell);
+  crownValid.forEach(li=>{
+    const fMat=getColMat('B_CR_F','F');
+    const sm=new THREE.Mesh(sliceGeom,fMat);
+    sm.scale.set(w,1,22);
+    sm.position.set(cx,yOf(li)-1.4+SLICE_H/2+0.36,0);
+    sm.userData={tower:'B',colKey:'CR',li,valid:crownValid,mat:fMat};
+    gB.add(sm);pickables.push(sm);
+  });
+  const n=crownValid.length;
+  const sl=new THREE.InstancedMesh(new THREE.BoxGeometry(w+0.6,0.35,23.6),slabMat,n);
+  const m4=new THREE.Matrix4();
+  crownValid.forEach((li,i)=>{m4.setPosition(cx,yOf(li)-1.4,0);sl.setMatrixAt(i,m4);});
+  gB.add(sl);
+  const rg=new THREE.Mesh(new THREE.BoxGeometry(w-3,0.7,18),roofGreen);
+  rg.position.set(cx,y1+0.4,0);gB.add(rg);
+  [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(cn=>{
+    const p=new THREE.Mesh(new THREE.BoxGeometry(1.2,8,1.2),finMat);
+    p.position.set(cx+cn[0]*w/2,y1+4,cn[1]*9);gB.add(p);});
+})();
+const hlMat=new THREE.MeshBasicMaterial({color:0xff8a5c,transparent:true,opacity:0.72});
+const hl=new THREE.Mesh(new THREE.BoxGeometry(1,SLICE_H,1),hlMat);hl.visible=false;scene.add(hl);
+/* ===== SURROUNDINGS ===== */
+const tm=new THREE.Matrix4();
+const treePts=[];
+for(let i=0;i<70;i++){const a=Math.random()*Math.PI*2,r=Math.sqrt(Math.random());treePts.push([-175+Math.cos(a)*115*r,-70+Math.sin(a)*85*r]);}
+for(let i=0;i<24;i++){const a=Math.random()*Math.PI*2;treePts.push([0+Math.cos(a)*105,10+Math.sin(a)*80]);}
+const trunkI=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.5,0.7,3.5),new THREE.MeshStandardMaterial({color:0x8a6a4a}),treePts.length);
+const folI=new THREE.InstancedMesh(new THREE.SphereGeometry(2.6,7,6),new THREE.MeshStandardMaterial({color:0x5d8f4e}),treePts.length);
+treePts.forEach((p,i)=>{const s=0.8+Math.random()*1.3;
+  tm.makeScale(s,s,s);tm.setPosition(p[0],1.6*s,p[1]);trunkI.setMatrixAt(i,tm);
+  tm.makeScale(s,s,s);tm.setPosition(p[0],4.6*s,p[1]);folI.setMatrixAt(i,tm);});
+scene.add(trunkI,folI);
+const hp=[];for(let r=0;r<4;r++)for(let c=0;c<7;c++)hp.push([128+c*13,24+r*16]);
+const hBody=new THREE.InstancedMesh(new THREE.BoxGeometry(9,7,11),new THREE.MeshStandardMaterial({color:0xf0ece2}),hp.length);
+const hRoof=new THREE.InstancedMesh(new THREE.ConeGeometry(7.4,3.4,4),new THREE.MeshStandardMaterial({color:0xa8543f}),hp.length);
+hp.forEach((p,i)=>{tm.identity();tm.setPosition(p[0],3.5,p[1]);hBody.setMatrixAt(i,tm);
+  tm.makeRotationY(Math.PI/4);tm.setPosition(p[0],8.7,p[1]);hRoof.setMatrixAt(i,tm);});
+scene.add(hBody,hRoof);
+const hillMat=new THREE.MeshStandardMaterial({color:0x6d8a55,roughness:1});
+[[40,330,260,60],[-260,300,220,48],[300,280,200,42],[-60,-570,420,70]].forEach(h=>{
+  const m=new THREE.Mesh(new THREE.SphereGeometry(1,20,14),hillMat);
+  m.scale.set(h[2],h[3],h[2]*0.7);m.position.set(h[0],0,h[1]);scene.add(m);});
+/* ===== LABELS ===== */
+const LBL=[[-14,deckY+3,-38,'Infinity Pool · L3A'],[-8,7,-72,'Grand Waterfall Cascades'],
+  [-10,2,-155,'Central Lake'],[-180,4,-70,'The Central Park'],[168,7,60,'ParkCity TownCenter →']];
+const lblEls=LBL.map(l=>{const d=document.createElement('div');d.className='lbl';d.textContent=l[3];
+  document.body.appendChild(d);return{el:d,v:new THREE.Vector3(l[0],l[1],l[2])};});
+let showLbl=true;const tmpV=new THREE.Vector3();
+function updateLabels(){lblEls.forEach(L=>{
+  if(!showLbl||inView){L.el.style.display='none';return;}
+  tmpV.copy(L.v).project(camera);
+  if(tmpV.z>1){L.el.style.display='none';return;}
+  L.el.style.display='block';
+  L.el.style.left=(tmpV.x*0.5+0.5)*innerWidth+'px';
+  L.el.style.top=(-tmpV.y*0.5+0.5)*innerHeight+'px';});}
+/* ===== CONTROLS / PICKING ===== */
+const el=renderer.domElement;
+let auto=!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+let drag=false,px=0,py=0,dx0=0,dy0=0,pinch=0,inView=false,savedCam=null;
+let sel=null;
+function setCam(){
+  phi=Math.max(0.3,Math.min(1.45,phi));radius=Math.max(100,Math.min(820,radius));
+  camera.position.set(target.x+radius*Math.sin(phi)*Math.sin(theta),
+    target.y+radius*Math.cos(phi),target.z+radius*Math.sin(phi)*Math.cos(theta));
+  camera.lookAt(target);
+  document.getElementById('needle').style.transform='rotate('+(theta*180/Math.PI)+'deg)';
+}
+const ray=new THREE.Raycaster(),ptr=new THREE.Vector2();
+function pick(cx,cy){
+  const sidebar=document.getElementById('sidebar');
+  if(sidebar.classList.contains('open')){
+    const sw=sidebar.getBoundingClientRect().right;
+    if(cx<sw)return;
+  }
+  ptr.x=(cx/innerWidth)*2-1;ptr.y=-(cy/innerHeight)*2+1;
+  ray.setFromCamera(ptr,camera);
+  const hit=ray.intersectObjects(pickables)[0];
+  if(hit)selectUnit(hit.object);
+}
+el.addEventListener('pointerdown',e=>{if(inView)return;drag=true;px=dx0=e.clientX;py=dy0=e.clientY;el.setPointerCapture(e.pointerId);});
+el.addEventListener('pointermove',e=>{if(!drag||inView)return;
+  theta-=(e.clientX-px)*0.0055;phi-=(e.clientY-py)*0.0045;
+  px=e.clientX;py=e.clientY;auto=false;syncRot();setCam();});
+el.addEventListener('pointerup',e=>{
+  if(drag&&!inView&&Math.hypot(e.clientX-dx0,e.clientY-dy0)<6)pick(e.clientX,e.clientY);
+  drag=false;});
+el.addEventListener('wheel',e=>{if(inView)return;e.preventDefault();radius*=(1+e.deltaY*0.001);setCam();},{passive:false});
+el.addEventListener('touchstart',e=>{if(e.touches.length>=2){drag=false;pinch=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);}},{passive:true});
+el.addEventListener('touchmove',e=>{if(inView)return;
+  if(e.touches.length===2){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+    if(pinch)radius*=pinch/d;pinch=d;drag=false;setCam();}},{passive:true});
+el.addEventListener('touchend',e=>{if(e.touches.length<2)pinch=0;});
+/* ===== UNIT PANEL ===== */
+const uP=document.getElementById('unitPanel'),
+  uStackHead=document.getElementById('uStackHead'),
+  uNo=document.getElementById('uNo'),
+  uType=document.getElementById('uType'),uDet=document.getElementById('uDet'),
+  uSlider=document.getElementById('uSlider'),uLvl=document.getElementById('uLvl'),
+  uViewB=document.getElementById('uView'),uCloseB=document.getElementById('uClose'),
+  exitB=document.getElementById('exitView');
+let activeUnit=null;
+function positionPanel(){
+  const wPos=new THREE.Vector3();
+  hl.getWorldPosition(wPos);
+  const proj=wPos.clone().project(camera);
+  const sx=(proj.x*0.5+0.5)*innerWidth;
+  const sy=(-proj.y*0.5+0.5)*innerHeight;
+  const pW=uP.offsetWidth||252,pH=uP.offsetHeight||200;
+  const gap=72;
+  const sidebar=document.getElementById('sidebar');
+  const sidebarRight=sidebar.classList.contains('open')?sidebar.getBoundingClientRect().right:0;
+  const panelLeft=sidebarRight+8;
+  const isMobile=innerWidth<=700;
+  let left,top,arrowClass;
+  if(!isMobile&&sx+gap+pW<innerWidth-8){
+    left=sx+gap;top=Math.max(8,Math.min(sy-pH/2,innerHeight-pH-8));arrowClass='arrow-left';
+  }else if(sx-gap-pW>panelLeft){
+    left=sx-gap-pW;top=Math.max(8,Math.min(sy-pH/2,innerHeight-pH-8));arrowClass='arrow-right';
+  }else if(sy-gap-pH>8){
+    left=Math.max(panelLeft,Math.min(sx-pW/2,innerWidth-pW-8));top=sy-gap-pH;arrowClass='arrow-bottom';
+  }else{
+    left=Math.max(panelLeft,Math.min(sx-pW/2,innerWidth-pW-8));top=Math.min(sy+gap,innerHeight-pH-8);arrowClass='arrow-top';
+  }
+  uP.style.left=left+'px';uP.style.top=top+'px';
+  uP.style.right='auto';uP.style.bottom='auto';
+  uP.className='';uP.classList.add(arrowClass);
+}
+function clearSelEmissive(){
+  if(sel&&sel.mat){
+    pickables.forEach(m=>{
+      if(m.userData.tower===sel.tower&&m.userData.colKey===sel.colKey)
+        m.userData.mat.emissive&&m.userData.mat.emissive.setHex(0x000000);
+    });
+  }
+}
+function selectUnit(mesh){
+  clearSelEmissive();
+  const d=mesh.userData;
+  const li=d.li;
+  sel={mesh,tower:d.tower,colKey:d.colKey,valid:d.valid,mat:d.mat,li};
+  d.mat.emissive=new THREE.Color(0x442211);d.mat.emissiveIntensity=1;
+  uSlider.min=0;uSlider.max=d.valid.length-1;uSlider.value=d.valid.indexOf(li);
+  activeUnit={tower:d.tower,colKey:d.colKey};
+  uP.style.display='block';auto=false;syncRot();updateUnit();
+}
+function selectStack(mesh){
+  const d=mesh.userData;
+  const li=d.li!==undefined?d.li:d.valid[Math.floor(d.valid.length*0.6)];
+  const slice=pickables.find(m=>m.userData.tower===d.tower&&m.userData.colKey===d.colKey&&m.userData.li===li)||mesh;
+  selectUnit(slice);
+}
+function updateUnit(){
+  const lvl=LEVELS[sel.li];
+  const displayColKey=(activeUnit&&activeUnit.colKey)?activeUnit.colKey:sel.colKey;
+  const u=unitInfo(sel.tower,displayColKey,lvl)||unitInfo(sel.tower,sel.colKey,lvl);
+  if(!u)return;
+  uStackHead.textContent='Tower '+sel.tower+' · Level '+lvl;
+  uNo.textContent=u.no;
+  uType.textContent='Type '+u.type+' · '+u.beds;
+  uDet.innerHTML='<b>'+u.sf.toLocaleString()+' sf</b> built-up<br>Facing: '+u.face;
+  uLvl.textContent='Level '+lvl;
+  const activeColKey=displayColKey;
+  const c=(activeColKey==='CR')?null:TOWERS[sel.tower].cols.find(x=>x.k===activeColKey);
+  const w=c?c.w:25,lx=c?c._x:(TOWERS.B.cols[0]._x+TOWERS.B.cols[1]._x)/2;
+  const g=(sel.tower==='A')?gA:gB;
+  hl.scale.set(w+1.6,1,26);
+  hl.position.set(lx,0,0).applyMatrix4(g.matrixWorld);
+  hl.position.y=yOf(sel.li)-1.4+SLICE_H/2+0.36;
+  hl.rotation.y=TOWERS[sel.tower].rot;
+  hl.visible=true;
+  requestAnimationFrame(positionPanel);
+}
+uSlider.oninput=()=>{
+  if(!sel)return;
+  const newLi=sel.valid[parseInt(uSlider.value)];
+  const colKey=activeUnit?activeUnit.colKey:sel.colKey;
+  const lvl=LEVELS[newLi];
+  const u=unitInfo(sel.tower,colKey,lvl);
+  const ck=u?colKey:sel.colKey;
+  const mesh=findMesh(sel.tower,ck,newLi);
+  if(!mesh)return;
+  selectUnit(mesh);
+  uSlider.value=sel.valid.indexOf(newLi);
+  requestAnimationFrame(positionPanel);
+};
+uCloseB.onclick=()=>{uP.style.display='none';uP.className='';hl.visible=false;
+  clearSelEmissive();sel=null;};
+uViewB.onclick=()=>{
+  if(!sel)return;
+  savedCam={theta,phi,radius};inView=true;
+  const ck=(activeUnit&&activeUnit.colKey)?activeUnit.colKey:sel.colKey;
+  const u=unitInfo(sel.tower,ck,LEVELS[sel.li])||unitInfo(sel.tower,sel.colKey,LEVELS[sel.li]);
+  const y=yOf(sel.li)+1.7;
+  const p=hl.position.clone();
+  const dir=new THREE.Vector3(u.dir[0],0,u.dir[1]).normalize();
+  camera.position.set(p.x+dir.x*16,y,p.z+dir.z*16);
+  camera.lookAt(p.x+dir.x*400,y-30,p.z+dir.z*400);
+  exitB.style.display='block';uP.style.display='none';
+};
+exitB.onclick=()=>{inView=false;exitB.style.display='none';
+  if(savedCam){theta=savedCam.theta;phi=savedCam.phi;radius=savedCam.radius;}
+  if(sel)uP.style.display='block';
+  setCam();};
+/* ===== LIGHTING ===== */
+const MODES={am:{bg:0xd6ecf4,hemi:0.95,sun:1.0,col:0xfff2d8,pos:[230,200,20],lake:0x6fb7c9},
+  pm:{bg:0xcfe3ec,hemi:0.9,sun:1.05,col:0xffe3ba,pos:[-230,170,60],lake:0x6fb7c9},
+  dk:{bg:0x2b3450,hemi:0.35,sun:0.25,col:0xffa46b,pos:[-260,55,150],lake:0x2e5a6e}};
+const mBtns={am:document.getElementById('mAM'),pm:document.getElementById('mPM'),dk:document.getElementById('mDK')};
+function setMode(k){const M=MODES[k];
+  Object.keys(mBtns).forEach(b=>mBtns[b].classList.toggle('on',b===k));
+  scene.background=new THREE.Color(M.bg);scene.fog=new THREE.Fog(M.bg,430,1350);
+  hemi.intensity=M.hemi;sun.intensity=M.sun;sun.color.setHex(M.col);
+  sun.position.set(M.pos[0],M.pos[1],M.pos[2]);lakeMat.color.setHex(M.lake);}
+mBtns.am.onclick=()=>setMode('am');mBtns.pm.onclick=()=>setMode('pm');mBtns.dk.onclick=()=>setMode('dk');
+setMode('am');
+const rotBtn=document.getElementById('rotBtn'),lblBtn=document.getElementById('lblBtn');
+function syncRot(){rotBtn.classList.toggle('on',auto);rotBtn.textContent=auto?'⟳ Rotating':'⟳ Rotate';}
+rotBtn.onclick=()=>{if(inView)return;auto=!auto;syncRot();};
+lblBtn.onclick=()=>{showLbl=!showLbl;lblBtn.classList.toggle('on',showLbl);};
+syncRot();setCam();
+/* ===== SEARCH ===== */
+const sBox=document.getElementById('uSearch'),sMsg=document.getElementById('uSearchMsg');
+function findMesh(tw,colKey,li){
+  return pickables.find(m=>m.userData.tower===tw&&m.userData.colKey===colKey&&(li===undefined||m.userData.li===li));
+}
+function jumpToUnit(tw,lvl,stk){
+  if(!LEVELS.includes(lvl))return false;
+  const li=LI[lvl];
+  const keys=(tw==='B'&&li>=LI['37'])?['CR',...TOWERS.B.cols.map(c=>c.k)]:TOWERS[tw].cols.map(c=>c.k);
+  for(const k of keys){
+    if(stackNoOf(tw,k,lvl)===stk){
+      const mesh=findMesh(tw,k,li);
+      if(!mesh)continue;
+      selectUnit(mesh);
+      activeUnit={tower:tw,colKey:k};uSlider.value=sel.valid.indexOf(li);updateUnit();
+      target.y=Math.min(120,yOf(li));setCam();
+      return true;
+    }
+  }
+  return false;
+}
+function runSearch(q){
+  q=q.trim().toUpperCase().replace(/^PR\//,'');
+  if(!q){sMsg.style.display='none';return;}
+  let m=q.match(/^([AB])\/(\d+A?)\/(\d+A?)/);
+  if(!m){m=q.match(/^(\d+A?)\/(\d+A?)$/);if(m)m=['','B',m[1],m[2]];}
+  if(m){
+    const ok=jumpToUnit(m[1],m[2],m[3]);
+    sMsg.style.display='block';
+    sMsg.textContent=ok?'Found — panel shows unit details':'No unit at that level/stack';
+    sMsg.style.color=ok?'#7d9b76':'#c26e60';
+    return;
+  }
+  const tm2=q.match(/^([A-F])(\d)?A?$/);
+  if(tm2){
+    const hit=pickables.find(p=>{
+      const lvl0=LEVELS[p.userData.valid[Math.floor(p.userData.valid.length/2)]];
+      const u=unitInfo(p.userData.tower,p.userData.colKey,lvl0);
+      return u&&u.type.toUpperCase().startsWith(q);
+    });
+    if(hit){selectStack(hit);sMsg.style.display='block';sMsg.textContent='Showing a Type '+q+' stack';sMsg.style.color='#7d9b76';return;}
+  }
+  sMsg.style.display='block';sMsg.textContent='Format: B/33/6 or A/27/1';sMsg.style.color='#c26e60';
+}
+sBox.addEventListener('keydown',e=>{if(e.key==='Enter'){runSearch(sBox.value);sBox.blur();}});
+sBox.addEventListener('input',()=>{if(!sBox.value.trim())sMsg.style.display='none';});
+sBox.addEventListener('focus',()=>{auto=false;syncRot();});
+/* ===== FILTER LOGIC ===== */
+const filterMsg=document.getElementById('filterMsg');
+let activeFilter=null;
+document.getElementById('applyFilter').addEventListener('click',()=>{
+  const types=new Set();
+  document.querySelectorAll('.typeChip.on').forEach(c=>types.add(c.dataset.type));
+  const minP=parseFloat(document.getElementById('priceMin').value)||0;
+  const maxP=parseFloat(document.getElementById('priceMax').value)||Infinity;
+  const minSf=minP>0?minP/700:0;
+  const maxSf=maxP<Infinity?maxP/500:Infinity;
+  activeFilter={types,minSf,maxSf};
+  let shown=0,hidden=0;
+  pickables.forEach(m=>{
+    const li=m.userData.li;
+    const lvl=LEVELS[li];
+    const u=unitInfo(m.userData.tower,m.userData.colKey,lvl);
+    if(!u){m.userData.mat.transparent=true;m.userData.mat.opacity=0.12;hidden++;return;}
+    const cat=u.type[0];
+    const pass=types.has(cat)&&u.sf>=minSf&&u.sf<=maxSf;
+    m.userData.mat.transparent=!pass;
+    m.userData.mat.opacity=pass?1:0.08;
+    if(pass)shown++;else hidden++;
+  });
+  filterMsg.style.display='block';
+  filterMsg.textContent=shown+' floor slice'+(shown!==1?'s':'')+' match'+(shown===1?'es':'')+' · '+(types.size===6&&minP===0&&maxP===Infinity?'No filter active':'Filter applied');
+  filterMsg.style.color=shown>0?'#7d9b76':'#c26e60';
+});
+document.getElementById('clearFilter').addEventListener('click',()=>{
+  activeFilter=null;
+  document.querySelectorAll('.typeChip').forEach(c=>c.classList.add('on'));
+  document.getElementById('priceMin').value='';
+  document.getElementById('priceMax').value='';
+  pickables.forEach(m=>{m.userData.mat.transparent=false;m.userData.mat.opacity=1;});
+  filterMsg.style.display='none';
+});
+document.querySelectorAll('.typeChip').forEach(c=>{
+  c.addEventListener('click',()=>c.classList.toggle('on'));
+});
+/* ===== SIDEBAR ACCORDION ===== */
+document.querySelectorAll('.sSecHead').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const body=document.getElementById(btn.dataset.target);
+    const isOpen=body.classList.contains('open');
+    body.classList.toggle('open',!isOpen);
+    btn.classList.toggle('open',!isOpen);
+  });
+});
+/* ===== SIDEBAR TOGGLE ===== */
+const sidebarEl=document.getElementById('sidebar');
+const togBtn=document.getElementById('sidebarToggle');
+const headTogBtn=document.getElementById('sidebarHeadToggle');
+function updateToggleVis(){
+  const isOpen=sidebarEl.classList.contains('open');
+  togBtn.style.display=isOpen?'none':'flex';
+}
+function toggleSidebar(){
+  sidebarEl.classList.toggle('open');
+  updateToggleVis();
+  if(sel&&uP.style.display==='block')requestAnimationFrame(positionPanel);
+}
+togBtn.addEventListener('click',toggleSidebar);
+headTogBtn.addEventListener('click',toggleSidebar);
+updateToggleVis();
+
+/* ===== LIGHTBOX ===== */
+const lbBg=document.getElementById('lightboxBg');
+const lbImg=document.getElementById('lightboxImg');
+let lbPhotos=[],lbIdx=0;
+document.getElementById('lightboxClose').addEventListener('click',()=>lbBg.classList.remove('open'));
+lbBg.addEventListener('click',e=>{if(e.target===lbBg)lbBg.classList.remove('open');});
+function openLightbox(photos,idx){
+  lbPhotos=photos;lbIdx=idx||0;
+  lbImg.src=lbPhotos[lbIdx];lbBg.classList.add('open');
+  updateLbNav();
+}
+function lbGo(n){lbIdx=(n+lbPhotos.length)%lbPhotos.length;lbImg.src=lbPhotos[lbIdx];updateLbNav();}
+function updateLbNav(){
+  let c=document.getElementById('lbCount');
+  if(lbPhotos.length>1){
+    if(!c){c=document.createElement('div');c.id='lbCount';c.style.cssText='position:absolute;bottom:18px;left:50%;transform:translateX(-50%);color:#fff;font-size:12px;background:rgba(0,0,0,.5);padding:3px 10px;border-radius:20px;z-index:201;';lbBg.appendChild(c);}
+    c.textContent=`${lbIdx+1} / ${lbPhotos.length}`;
+  } else if(c) c.remove();
+  let pp=document.getElementById('lbPrev'),np=document.getElementById('lbNext');
+  if(lbPhotos.length>1){
+    if(!pp){pp=document.createElement('button');pp.id='lbPrev';pp.textContent='‹';pp.style.cssText='position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:36px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:6px;padding:4px 14px;cursor:pointer;z-index:210;';pp.addEventListener('click',e=>{e.stopPropagation();lbGo(lbIdx-1);});lbBg.appendChild(pp);}
+    if(!np){np=document.createElement('button');np.id='lbNext';np.textContent='›';np.style.cssText='position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:36px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:6px;padding:4px 14px;cursor:pointer;z-index:210;';np.addEventListener('click',e=>{e.stopPropagation();lbGo(lbIdx+1);});lbBg.appendChild(np);}
+    pp.style.display=np.style.display='block';
+  } else {
+    if(pp)pp.style.display='none';if(np)np.style.display='none';
+  }
+}
+let lbTX=0;
+lbBg.addEventListener('touchstart',e=>{lbTX=e.touches[0].clientX;},{passive:true});
+lbBg.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-lbTX;if(Math.abs(dx)>40)lbGo(dx<0?lbIdx+1:lbIdx-1);},{passive:true});
+document.addEventListener('keydown',e=>{if(!lbBg.classList.contains('open'))return;if(e.key==='ArrowLeft')lbGo(lbIdx-1);if(e.key==='ArrowRight')lbGo(lbIdx+1);if(e.key==='Escape')lbBg.classList.remove('open');});
+
+/* ===== GOOGLE SHEETS LISTINGS ===== */
+const SHEET_CSV="https://docs.google.com/spreadsheets/d/e/2PACX-1vT0rPrsu_CX8Kp42NNTb898eINQXPF_sxhzKhiM-7js4xnenU6ca1B4UDszUfO62_JpZaxwoXMOPlMw/pub?gid=0&single=true&output=csv";
+function parseUnitCode(code){
+  code=code.trim().toUpperCase().replace(/^PR\//,'');
+  var m=code.match(/^([AB])\/([0-9]+A?)\/([0-9]+A?)$/);
+  if(m)return{tower:m[1],lvl:m[2],stack:m[3]};
+  var m2=code.match(/^([AB])\/([0-9]+A?)$/);
+  if(m2)return{tower:m2[1],lvl:m2[2],stack:null};
+  return null;
+}
+function autoDesc(tower,lvl,stack){
+  if(!tower||!lvl||!LEVELS.includes(lvl))return'';
+  var li=LI[lvl];if(li===undefined)return'';
+  var colKey=null;
+  if(stack){
+    var keys=(tower==='B'&&li>=LI['37'])?['CR',...TOWERS.B.cols.map(c=>c.k)]:TOWERS[tower].cols.map(c=>c.k);
+    for(var k of keys){if(stackNoOf(tower,k,lvl)===stack){colKey=k;break;}}
+  }
+  if(!colKey){
+    var cols=TOWERS[tower].cols;
+    for(var c of cols){if(li<=LI[c.top]&&c.t(lvl)){colKey=c.k;break;}}
+  }
+  if(!colKey)return'';
+  var u=unitInfo(tower,colKey,lvl);
+  if(!u)return'';
+  return u.beds+' · '+u.sf.toLocaleString()+' sf<br>Facing: '+u.face;
+}
+function parseCSV(text){
+  var lines=text.trim().split('\n');
+  if(lines.length<2)return[];
+  var headers=lines[0].split(',').map(h=>h.trim().toLowerCase().replace(/\r/g,''));
+  var rows=[];
+  for(var i=1;i<lines.length;i++){
+    var vals=lines[i].split(',').map(v=>v.trim().replace(/\r/g,''));
+    if(!vals[0])continue;
+    var row={};headers.forEach((h,idx)=>{row[h]=vals[idx]||'';});
+    rows.push(row);
+  }
+  return rows;
+}
+function buildCard(row){
+  var section=(row.section||'').toLowerCase().trim();
+  var unitRaw=(row.unit||'').trim();
+  var price=(row.price||'').trim();
+  var extraDesc=(row.desc||'').trim();
+  var photoUrl=(row.photo||'').trim();
+  if(!unitRaw||!price||(section!=='sale'&&section!=='rent'))return null;
+  var parsed=parseUnitCode(unitRaw);if(!parsed)return null;
+  var tower=parsed.tower,lvl=parsed.lvl,stack=parsed.stack;
+  var isSale=section==='sale';
+  var displayUnit='PR/'+tower+'/'+lvl+(stack?'/'+stack:'');
+  var desc=autoDesc(tower,lvl,stack);
+  var photos=photoUrl?photoUrl.split('|').map(s=>s.trim()).filter(Boolean):[];
+  var hasExpand=!!(photos.length||extraDesc);
+  var card=document.createElement('div');
+  card.className='listingCard';
+  card.dataset.tower=tower;card.dataset.lvl=lvl;
+  if(stack)card.dataset.stack=stack;
+
+  var clickArea=document.createElement('div');clickArea.className='lcClickArea';
+  clickArea.innerHTML='<div class="lcUnit">'+displayUnit+'</div>'+
+    (desc?'<div class="lcSub">'+desc+'</div>':'')+
+    '<div class="lcPrice">'+price+'</div>'+
+    '<span class="lcBadge '+(isSale?'lcBadgeSale':'lcBadgeRent')+'">'+(isSale?'For Sale':'For Rent')+'</span>';
+  clickArea.addEventListener('click',function(){
+    if(tower&&lvl&&stack){var ok=jumpToUnit(tower,lvl,stack);if(ok){target.y=Math.min(120,yOf(LI[lvl]));setCam();}}
+  });
+  card.appendChild(clickArea);
+
+  if(hasExpand){
+    var expandBtn=document.createElement('button');expandBtn.className='lcExpandBtn';expandBtn.type='button';
+    expandBtn.innerHTML='📷 '+(photos.length>1?photos.length+' photos':'Photos & Details')+'<span class="lcExpandChev">▼</span>';
+    var photoPanel=document.createElement('div');photoPanel.className='lcPhotoPanel';
+
+    if(photos.length===1){
+      var img=document.createElement('img');img.className='lcPhoto';img.src=photos[0];img.alt='Unit photo';img.loading='lazy';
+      img.addEventListener('click',function(){openLightbox(photos,0);});
+      photoPanel.appendChild(img);
+    } else if(photos.length>1){
+      var cur=0;
+      var gallery=document.createElement('div');gallery.className='lcGallery';
+      var gImg=document.createElement('img');gImg.src=photos[0];gImg.alt='Unit photo';gImg.loading='lazy';
+      var prev=document.createElement('button');prev.className='lcGalleryNav lcGalleryPrev';prev.textContent='‹';
+      var next=document.createElement('button');next.className='lcGalleryNav lcGalleryNext';next.textContent='›';
+      var count=document.createElement('div');count.className='lcGalleryCount';count.textContent='1 / '+photos.length;
+      gallery.appendChild(gImg);gallery.appendChild(prev);gallery.appendChild(next);gallery.appendChild(count);
+      var dots=document.createElement('div');dots.className='lcGalleryDots';
+      photos.forEach(function(_,i){var d=document.createElement('span');if(i===0)d.className='on';d.addEventListener('click',function(){goG(i);});dots.appendChild(d);});
+      function goG(n){cur=(n+photos.length)%photos.length;gImg.src=photos[cur];count.textContent=(cur+1)+' / '+photos.length;dots.querySelectorAll('span').forEach(function(d,i){d.className=i===cur?'on':'';});}
+      gImg.addEventListener('click',function(){openLightbox(photos,cur);});
+      prev.addEventListener('click',function(e){e.stopPropagation();goG(cur-1);});
+      next.addEventListener('click',function(e){e.stopPropagation();goG(cur+1);});
+      photoPanel.appendChild(gallery);photoPanel.appendChild(dots);
+    }
+
+    if(extraDesc){var pd=document.createElement('div');pd.className='lcPhotoDesc';pd.textContent=extraDesc;photoPanel.appendChild(pd);}
+    if(!photos.length&&!extraDesc){var ph=document.createElement('div');ph.className='lcPhotoPlaceholder';ph.textContent='No photo';photoPanel.appendChild(ph);}
+
+    expandBtn.addEventListener('click',function(e){
+      e.stopPropagation();
+      var isOpen=photoPanel.classList.contains('open');
+      photoPanel.classList.toggle('open',!isOpen);
+      expandBtn.classList.toggle('open',!isOpen);
+    });
+    card.appendChild(expandBtn);card.appendChild(photoPanel);
+  }
+
+  return{card:card,section:section};
+}
+async function fetchListings(){
+  try{
+    var res=await fetch(SHEET_CSV+'&nc='+Date.now());
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    var text=await res.text();
+    var rows=parseCSV(text);
+    var sL=document.getElementById('saleList');
+    var rL=document.getElementById('rentList');
+    sL.innerHTML='';rL.innerHTML='';
+    var sc=0,rc=0;
+    rows.forEach(function(row){
+      var r=buildCard(row);if(!r)return;
+      if(r.section==='sale'){sL.appendChild(r.card);sc++;}
+      else{rL.appendChild(r.card);rc++;}
+    });
+    if(sc===0)sL.innerHTML='<div class="listingEmpty">No listings</div>';
+    if(rc===0)rL.innerHTML='<div class="listingEmpty">No listings</div>';
+  }catch(e){
+    document.getElementById('saleList').innerHTML='<div class="listingEmpty">Could not load</div>';
+    document.getElementById('rentList').innerHTML='<div class="listingEmpty">Could not load</div>';
+  }
+}
+fetchListings();
+
+/* ===== RESIZE ===== */
+function fitViewport(){
+  const w=innerWidth,h=(window.visualViewport?visualViewport.height:innerHeight);
+  camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h);
+  if(sel&&uP.style.display==='block')requestAnimationFrame(positionPanel);
+}
+addEventListener('resize',fitViewport);
+addEventListener('orientationchange',()=>setTimeout(fitViewport,300));
+if(window.visualViewport)visualViewport.addEventListener('resize',fitViewport);
+fitViewport();
+(function loop(){requestAnimationFrame(loop);
+  if(auto&&!drag&&!inView){theta+=0.0018;setCam();}
+  updateLabels();renderer.render(scene,camera);})();
+})();
+</script>
+
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('./sw.js').catch(function(){});
+  });
+}
+</script>
+</body>
+</html>

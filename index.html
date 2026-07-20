@@ -507,7 +507,7 @@ const LI={};LEVELS.forEach((l,i)=>LI[l]=i);
 const isVar=l=>l.includes('A')||parseInt(l)%2===0;
 const SIZE={A1:[893,872],A2:[883,872],B1:[1109,1098],B2:[1163,1152],C1:[1475,1464],C2:[1539,1518],
   C3:[2346,2325],C4:[2346,2325],C5:[2433,2400],D1:[2626,2583],D2:[2562,2519],D3:[2616,2573],
-  D4:[2723,2680],E1:[2960,2928],E2:[3100,3046],F1:[4510,4446],F2:[4887,4812]};
+  D4:[2723,2680],E1:[2960,2928],E2:[3100,3046],F1:[4511,4446],F2:[4887,4812]};
 const BEDS={A:'1 Bed · 1 Bath · Powder',B:'1 Bed + Study',C:'2 Beds + Study',D:'3 Beds + Maid',E:'3 Beds + Family',F:'4 Beds + Family'};
 const PREMIUM=['C3','C4','C5'];
 const SP=['15','16','35','36'];
@@ -974,29 +974,57 @@ document.querySelectorAll('.sSecHead').forEach(btn=>{
 /* ===== UNIT BROWSER GENERATOR ===== */
 (function(){
   const UNIT_DEFS=[
-    {type:'A',color:'#e8c07d',spec:'1 Bed · 1 Bath',sfRange:'538–700 sf',
+    {type:'A',color:'#e8c07d',spec:'1 Bed · 1 Bath · Powder',sfRange:'872–893 sf',
      variants:[
-       {v:'Type A',sf:'538–700 sf',floors:'L5–53 (selected stacks)'}
+       {v:'A1',sf:'893 sf',floors:'Tower B · Stack 3A · L5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,37,39,41,43,45,47'},
+       {v:'A1a',sf:'872 sf',floors:'Tower B · Stack 3A · L6,8,10,12,13A,18,20,22,25A,26,28,30,32,33A,38,40,42,43A,46,48'},
+       {v:'A2',sf:'883 sf',floors:'Tower B · Stack 3 · L5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35,37,39,41,43,45,47'},
+       {v:'A2a',sf:'872 sf',floors:'Tower B · Stack 3 · L6,8,10,12,13A,16,18,20,22,25A,26,28,30,32,33A,36,38,40,42,43A,46,48'}
      ]},
-    {type:'B',color:'#d99a6c',spec:'1 Bed · 1 Bath · Study',sfRange:'700–850 sf',
+    {type:'B',color:'#d99a6c',spec:'1 Bed + Study · 1 Bath · Powder',sfRange:'1,098–1,163 sf',
      variants:[
-       {v:'Type B',sf:'700–850 sf',floors:'L5–53 (selected stacks)'}
+       {v:'B1',sf:'1,109 sf',floors:'Tower B · Stack 7 · L5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35,37,39,41,43'},
+       {v:'B1a',sf:'1,098 sf',floors:'Tower B · Stack 7 · L6,8,10,12,13A,16,18,20,22,25A,26,28,30,32,33A,36,38,40,42,43A'},
+       {v:'B2',sf:'1,163 sf',floors:'Tower B · Stack 5 · L5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35,37,39,41,43'},
+       {v:'B2a',sf:'1,152 sf',floors:'Tower B · Stack 5 · L6,8,10,12,13A,16,18,20,22,25A,26,28,30,32,33A,36,38,40,42,43A'}
      ]},
-    {type:'C',color:'#c26e60',spec:'2 Bed · 2 Bath · Study',sfRange:'1,044–1,270 sf',
+    {type:'C',color:'#c26e60',spec:'2 Beds + Study · 2 Baths · Powder',sfRange:'1,464–2,453 sf',
      variants:[
-       {v:'Type C',sf:'1,044–1,270 sf',floors:'L5–53 (selected stacks)'}
+       {v:'C1',sf:'1,475 sf',floors:'Tower B · Stack 8 · L5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35,37,39,41,43,45,47'},
+       {v:'C1a',sf:'1,464 sf',floors:'Tower B · Stack 8 · L6,8,10,12,13A,16,18,20,22,25A,26,28,30,32,33A,36,38,40,42,43A,46,48'},
+       {v:'C2',sf:'1,539 sf',floors:'Tower B · Stack 9 · L5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35,37,39,41,43,45,47'},
+       {v:'C2a',sf:'1,518 sf',floors:'Tower B · Stack 9 · L6,8,10,12,13A,16,18,20,22,25A,26,28,30,32,33A,36,38,40,42,43A,46,48'},
+       {v:'C3 ★',sf:'2,346 sf',floors:'Tower A · Stack 2 · L15, 35 · Private Lobby'},
+       {v:'C3a ★',sf:'2,325 sf',floors:'Tower A · Stack 2 · L16, 36 · Private Lobby'},
+       {v:'C4 ★',sf:'2,346 sf',floors:'Tower A · Stack 3A · L15 · Private Lobby'},
+       {v:'C4a ★',sf:'2,325 sf',floors:'Tower A · Stack 3A · L16 · Private Lobby'},
+       {v:'C5 ★',sf:'2,453 sf',floors:'Tower B · Stack 1 · L15, 35 · Private Lobby'},
+       {v:'C5a ★',sf:'2,400 sf',floors:'Tower B · Stack 1 · L16, 36 · Private Lobby'}
      ]},
-    {type:'D',color:'#8fa8b8',spec:'3 Bed · 2 Bath',sfRange:'1,270–1,550 sf',
+    {type:'D',color:'#8fa8b8',spec:'3 Beds · Maid\'s Room · Private Lobby',sfRange:'2,519–2,723 sf',
      variants:[
-       {v:'Type D',sf:'1,270–1,550 sf',floors:'L5–53 (selected stacks)'}
+       {v:'D1',sf:'2,626 sf',floors:'Tower A · Stack 2 · L5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,37,39,41'},
+       {v:'D1a',sf:'2,583 sf',floors:'Tower A · Stack 2 · L6,8,10,12,13A,18,20,22,25A,26,28,30,32,33A,38,40,42'},
+       {v:'D2',sf:'2,562 sf',floors:'Tower A · Stack 3 · L5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35'},
+       {v:'D2a',sf:'2,519 sf',floors:'Tower A · Stack 3 · L6,8,10,12,13A,16,18,20,22,25A,26,28,30,32,33A,36'},
+       {v:'D3',sf:'2,616 sf',floors:'Tower A · Stack 3A · L5,7,9,11,15,17,19,21,23,25,27,29,31,33'},
+       {v:'D3a',sf:'2,573 sf',floors:'Tower A · Stack 3A · L6,8,10,12,13A,18,20,22,23A,26,28,30,32,33A'},
+       {v:'D4',sf:'2,723 sf',floors:'Tower B · Stack 1 · L5,7,9,11,13,15,17,19,21,23,25,27,29,31,33'},
+       {v:'D4a',sf:'2,680 sf',floors:'Tower B · Stack 1 · L6,8,10,12,13A,18,20,22,25A,26,28,30,32,33A'}
      ]},
-    {type:'E',color:'#7d9b76',spec:'3 Bed · 3 Bath · Flexi',sfRange:'1,550–1,800 sf',
+    {type:'E',color:'#7d9b76',spec:'3 Beds + Family · Maid\'s Room · Private Lobby',sfRange:'2,928–3,100 sf',
      variants:[
-       {v:'Type E',sf:'1,550–1,800 sf',floors:'L5–53 (selected stacks)'}
+       {v:'E1',sf:'2,960 sf',floors:'Tower A · Stack 1 · L5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35,37,39,41,43'},
+       {v:'E1a',sf:'2,928 sf',floors:'Tower A · Stack 1 · L6,8,10,12,13A,16,18,20,22,25A,26,28,30,32,33A,36,38,40,42,43A'},
+       {v:'E2',sf:'3,100 sf',floors:'Tower B · Stack 2 · L5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35'},
+       {v:'E2a',sf:'3,046 sf',floors:'Tower B · Stack 2 · L6,8,10,12,13A,16,18,20,22,25A,26,28,30,32,33A,36'}
      ]},
-    {type:'F',color:'#6b5b73',spec:'4 Bed · 4 Bath · Flexi',sfRange:'2,100–2,400 sf',
+    {type:'F',color:'#6b5b73',spec:'4 Beds + Family · Maid\'s Room · Private Lobby',sfRange:'4,446–4,887 sf',
      variants:[
-       {v:'Type F',sf:'2,100–2,400 sf',floors:'L36–53 (selected stacks)'}
+       {v:'F1',sf:'4,511 sf',floors:'Tower B · Stack 6 · L5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35'},
+       {v:'F1a',sf:'4,446 sf',floors:'Tower B · Stack 6 · L6,8,10,12,13A,16,18,20,22,25A,26,28,30,32,33A,36'},
+       {v:'F2',sf:'4,887 sf',floors:'Tower B · Crown · L39,41,43,45,47,49,51,53'},
+       {v:'F2a',sf:'4,812 sf',floors:'Tower B · Crown · L38,40,42,43A,46,48,50,52'}
      ]}
   ];
 

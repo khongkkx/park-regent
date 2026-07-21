@@ -600,19 +600,17 @@ scene.add(blob(80,-170,70,45,lakeMat,0.15));
 scene.add(blob(-200,-50,110,80,parkMat,0.1));
 scene.add(blob(130,100,80,55,parkMat,0.1));
 const siteShape=new THREE.Shape();
-siteShape.moveTo(82,-92);
-siteShape.lineTo(82,100);                              // line 1: STRAIGHT right edge
-siteShape.lineTo(-140,100);                            // line 2: STRAIGHT bottom
-siteShape.bezierCurveTo(-175,-150,10,-195,82,-92);    // curve: left+top arc back to start
-siteShape.closePath();
+siteShape.moveTo(-82,-100);
+siteShape.lineTo(140,-100);                            // line 2: STRAIGHT top (Y-flipped bottom)
+siteShape.bezierCurveTo(175,150,-10,195,-82,92);      // curve: right+bottom arc (Y-flipped)
+siteShape.closePath();                                 // line 1: STRAIGHT left
 const baseGeo=new THREE.ExtrudeGeometry(siteShape,{depth:deckY,bevelEnabled:false});
 const base=new THREE.Mesh(baseGeo,podiumMat);
 base.rotation.x=-Math.PI/2;base.position.set(0,deckY,0);scene.add(base);
 const deckShape=new THREE.Shape();
-deckShape.moveTo(80,-90);
-deckShape.lineTo(80,98);
-deckShape.lineTo(-138,98);
-deckShape.bezierCurveTo(-173,-148,10,-193,80,-90);
+deckShape.moveTo(-80,-98);
+deckShape.lineTo(138,-98);
+deckShape.bezierCurveTo(173,148,-10,193,-80,90);
 deckShape.closePath();
 const deckGeo=new THREE.ShapeGeometry(deckShape);
 const deckTop=new THREE.Mesh(deckGeo,roofGreen);

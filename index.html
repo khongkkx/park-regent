@@ -357,11 +357,11 @@
 
     <!-- UNIT BROWSER -->
     <div class="sSection">
-      <button class="sSecHead" data-target="findBody">
+      <button class="sSecHead open" data-target="findBody">
         <span><span class="sIcon">🏠</span>Unit</span>
         <span class="sChevron">▼</span>
       </button>
-      <div class="sSecBody" id="findBody">
+      <div class="sSecBody open" id="findBody">
         <input id="uSearch" placeholder="e.g. B/33/6 or A/27/1" autocomplete="off" inputmode="text" autocapitalize="characters">
         <div id="uSearchMsg"></div>
 
@@ -526,7 +526,7 @@ const TOWERS={
     {k:'E2',w:15,top:'36', t:l=>'E2',dir:FACE_HILL, f:'Hills'},
     {k:'A2',w:9, top:'48', t:l=>'A2',dir:FACE_LAKE, f:'Lake & Facilities'},
     {k:'A1',w:9, top:'48', t:l=>SP.includes(l)?null:'A1',dir:FACE_LAKE, f:'Lake & Facilities'},
-    {k:'B2',w:9, top:'43A',t:l=>'B2',dir:FACE_LAKE, f:'Lake & Facilities'},
+    {k:'B2',w:9, top:'43A',t:l=>'B2',dir:FACE_LAKE, f:'Lake & Facilities', zOff:-26},
     {k:'F1',w:17,top:'36', t:l=>'F1',dir:FACE_LAKE, f:'Lake, Facilities & TownCenter'},
     {k:'B1',w:9, top:'43A',t:l=>'B1',dir:FACE_LAKE, f:'Lake, Facilities & TownCenter'},
     {k:'C1',w:12,top:'48', t:l=>'C1',dir:FACE_TC, f:'TownCenter'},
@@ -620,13 +620,14 @@ function buildTower(tw){
   g.position.set(T.cx,0,T.cz);g.rotation.y=T.rot;scene.add(g);
   const total=T.cols.reduce((s,c)=>s+c.w,0);let x=-total/2;
   T.cols.forEach((c,ci)=>{
+    const zOff=c.zOff||0;
     const valid=colValid(tw,ci);
     const h=yOf(valid[valid.length-1])+3.2-deckY;
     const midType=c.t(LEVELS[valid[Math.floor(valid.length/2)]])||'A1';
     const mat=getColMat(tw+'_'+c.k,midType[0]);
     const shell=new THREE.Mesh(new THREE.BoxGeometry(c.w-0.8,h,T.depth),
       new THREE.MeshStandardMaterial({color:TYPECOL[midType[0]],roughness:0.5,metalness:0.08,transparent:true,opacity:0.18}));
-    shell.position.set(x+c.w/2,deckY+h/2,0);
+    shell.position.set(x+c.w/2,deckY+h/2,zOff);
     g.add(shell);
     valid.forEach(li=>{
       const lvl=LEVELS[li];
@@ -634,17 +635,17 @@ function buildTower(tw){
       const fMat=getColMat(tw+'_'+c.k+'_'+typeChar,typeChar);
       const sm=new THREE.Mesh(sliceGeom,fMat);
       sm.scale.set(c.w-0.8,1,T.depth);
-      sm.position.set(x+c.w/2,yOf(li)-1.4+SLICE_H/2+0.36,0);
+      sm.position.set(x+c.w/2,yOf(li)-1.4+SLICE_H/2+0.36,zOff);
       sm.userData={tower:tw,colKey:c.k,li,valid,mat:fMat};
       g.add(sm);pickables.push(sm);
     });
     const n=valid.length;
     const sl=new THREE.InstancedMesh(new THREE.BoxGeometry(c.w-0.2,0.35,T.depth+1.6),slabMat,n);
     const m4=new THREE.Matrix4();
-    valid.forEach((li,i)=>{m4.setPosition(x+c.w/2,yOf(li)-1.4,0);sl.setMatrixAt(i,m4);});
+    valid.forEach((li,i)=>{m4.setPosition(x+c.w/2,yOf(li)-1.4,zOff);sl.setMatrixAt(i,m4);});
     g.add(sl);
     const rg=new THREE.Mesh(new THREE.BoxGeometry(c.w-2,0.7,T.depth-3),roofGreen);
-    rg.position.set(x+c.w/2,deckY+h+0.4,0);g.add(rg);
+    rg.position.set(x+c.w/2,deckY+h+0.4,zOff);g.add(rg);
     c._x=x+c.w/2;x+=c.w;
   });
   return g;

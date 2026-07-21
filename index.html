@@ -520,7 +520,7 @@ const TOWERS={
     {k:'D1',w:14,top:'42', t:l=>SP.includes(l)?'C3':'D1',dir:FACE_LAKE},
     {k:'D2',w:13,top:'36', t:l=>'D2',dir:FACE_LAKE},
     {k:'D3',w:14,top:'33A',t:l=>(l==='15'||l==='16')?'C4':'D3',dir:FACE_HILL}]},
- B:{rot:-0.16,cx:30,cz:-2,depth:22,face:null,
+ B:{rot:300*Math.PI/180,cx:65,cz:-2,depth:22,face:null,
    cols:[
     // N cap — F1 wide top
     {k:'F1',w:20,cx:2,    zOff:-56,top:'36', t:l=>'F1',dir:FACE_LAKE, f:'Lake, Facilities & TownCenter'},
@@ -598,10 +598,18 @@ scene.add(blob(-10,-165,195,95,lakeMat,0.15));
 scene.add(blob(150,-190,80,55,lakeMat,0.15));
 scene.add(blob(-175,-70,120,90,parkMat,0.1));
 scene.add(blob(120,115,90,60,parkMat,0.1));
-const base=new THREE.Mesh(new THREE.BoxGeometry(175,deckY,112),podiumMat);
-base.position.set(0,deckY/2,2);scene.add(base);
-const deckTop=new THREE.Mesh(new THREE.BoxGeometry(171,0.6,108),roofGreen);
-deckTop.position.set(0,deckY+0.3,2);scene.add(deckTop);
+const siteShape=new THREE.Shape();
+siteShape.moveTo(-100,130);siteShape.lineTo(130,100);siteShape.lineTo(120,-55);
+siteShape.lineTo(60,-140);siteShape.lineTo(-25,-140);siteShape.lineTo(-90,-75);siteShape.closePath();
+const baseGeo=new THREE.ExtrudeGeometry(siteShape,{depth:deckY,bevelEnabled:false});
+const base=new THREE.Mesh(baseGeo,podiumMat);
+base.rotation.x=-Math.PI/2;base.position.set(0,0,0);scene.add(base);
+const deckShape=new THREE.Shape();
+deckShape.moveTo(-98,128);deckShape.lineTo(128,98);deckShape.lineTo(118,-53);
+deckShape.lineTo(58,-138);deckShape.lineTo(-23,-138);deckShape.lineTo(-88,-73);deckShape.closePath();
+const deckGeo=new THREE.ShapeGeometry(deckShape);
+const deckTop=new THREE.Mesh(deckGeo,roofGreen);
+deckTop.rotation.x=-Math.PI/2;deckTop.position.set(0,deckY+0.1,0);scene.add(deckTop);
 const pool=new THREE.Mesh(new THREE.BoxGeometry(52,0.9,18),poolMat);
 pool.position.set(-14,deckY+0.75,-38);scene.add(pool);
 for(let i=0;i<6;i++){

@@ -841,10 +841,10 @@ function updateUnit(){
   uLvl.textContent='Level '+lvl;
   const activeColKey=displayColKey;
   const c=(activeColKey==='CR')?null:TOWERS[sel.tower].cols.find(x=>x.k===activeColKey);
-  const w=c?c.w:25,lx=c?c._x:(TOWERS.B.cols[0]._x+TOWERS.B.cols[1]._x)/2;
+  const w=c?c.w:25,lx=c?c._x:(TOWERS.B.cols[0]._x+TOWERS.B.cols[1]._x)/2,lz=c?(c.zOff||0):0;
   const g=(sel.tower==='A')?gA:gB;
   hl.scale.set(w+1.6,1,26);
-  hl.position.set(lx,0,0).applyMatrix4(g.matrixWorld);
+  hl.position.set(lx,0,lz).applyMatrix4(g.matrixWorld);
   hl.position.y=yOf(sel.li)-1.4+SLICE_H/2+0.36;
   hl.rotation.y=TOWERS[sel.tower].rot;
   hl.visible=true;

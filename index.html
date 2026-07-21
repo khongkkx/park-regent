@@ -520,7 +520,7 @@ const TOWERS={
     {k:'D1',w:14,top:'42', t:l=>SP.includes(l)?'C3':'D1',dir:FACE_LAKE},
     {k:'D2',w:13,top:'36', t:l=>'D2',dir:FACE_LAKE},
     {k:'D3',w:14,top:'33A',t:l=>(l==='15'||l==='16')?'C4':'D3',dir:FACE_HILL}]},
- B:{rot:300*Math.PI/180,cx:65,cz:-2,depth:22,face:null,
+ B:{rot:330*Math.PI/180,cx:100,cz:10,depth:22,face:null,
    cols:[
     // N cap — F1 wide top
     {k:'F1',w:20,cx:2,    zOff:-56,top:'36', t:l=>'F1',dir:FACE_LAKE, f:'Lake, Facilities & TownCenter'},
@@ -599,15 +599,18 @@ scene.add(blob(150,-190,80,55,lakeMat,0.15));
 scene.add(blob(-175,-70,120,90,parkMat,0.1));
 scene.add(blob(120,115,90,60,parkMat,0.1));
 const siteShape=new THREE.Shape();
-// shape.y maps to world.z after rotation x=-PI/2; wide at north (z neg), taper south
-siteShape.moveTo(-90,-110);siteShape.lineTo(105,-100);siteShape.lineTo(90,60);
-siteShape.lineTo(25,145);siteShape.lineTo(-80,60);siteShape.closePath();
+// shape(x,y): x=world.x, y=world.z (after rotation x=-PI/2)
+// wide at north (y neg), extends far east, tapers to SW tip
+siteShape.moveTo(-95,-130);siteShape.lineTo(-10,-160);siteShape.lineTo(115,-135);
+siteShape.lineTo(185,0);siteShape.lineTo(165,100);
+siteShape.lineTo(55,160);siteShape.lineTo(-85,85);siteShape.closePath();
 const baseGeo=new THREE.ExtrudeGeometry(siteShape,{depth:deckY,bevelEnabled:false});
 const base=new THREE.Mesh(baseGeo,podiumMat);
 base.rotation.x=-Math.PI/2;base.position.set(0,deckY,0);scene.add(base);
 const deckShape=new THREE.Shape();
-deckShape.moveTo(-88,-108);deckShape.lineTo(103,-98);deckShape.lineTo(88,58);
-deckShape.lineTo(23,143);deckShape.lineTo(-78,58);deckShape.closePath();
+deckShape.moveTo(-93,-128);deckShape.lineTo(-8,-158);deckShape.lineTo(113,-133);
+deckShape.lineTo(183,2);deckShape.lineTo(163,102);
+deckShape.lineTo(53,158);deckShape.lineTo(-83,83);deckShape.closePath();
 const deckGeo=new THREE.ShapeGeometry(deckShape);
 const deckTop=new THREE.Mesh(deckGeo,roofGreen);
 deckTop.rotation.x=-Math.PI/2;deckTop.position.set(0,deckY+0.1,0);scene.add(deckTop);

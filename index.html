@@ -393,33 +393,32 @@
         <table style="width:100%;border-collapse:collapse;font-size:11px;margin-top:6px;">
           <thead><tr style="border-bottom:1px solid var(--div);">
             <th style="text-align:left;padding:4px 6px;color:#8a7f79;font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:9px;">Level</th>
-            <th style="text-align:left;padding:4px 6px;color:#8a7f79;font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:9px;">Tower A</th>
-            <th style="text-align:left;padding:4px 6px;color:#8a7f79;font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:9px;">Tower B</th>
+            <th style="text-align:left;padding:4px 6px;color:#8a7f79;font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:9px;">Use</th>
           </tr></thead>
           <tbody>
             <tr style="border-bottom:1px solid var(--div);background:var(--card);">
               <td style="padding:5px 6px;font-weight:700;color:var(--ink);">L3A</td>
-              <td colspan="2" style="padding:5px 6px;color:#5d8f4e;font-weight:600;">Facility Deck</td>
+              <td style="padding:5px 6px;color:#5d8f4e;font-weight:600;">Facility Deck</td>
             </tr>
             <tr style="border-bottom:1px solid var(--div);">
               <td style="padding:5px 6px;font-weight:700;color:var(--ink);">L3</td>
-              <td colspan="2" style="padding:5px 6px;color:#8a7f79;">Carpark</td>
+              <td style="padding:5px 6px;color:#8a7f79;">Carpark</td>
             </tr>
             <tr style="border-bottom:1px solid var(--div);background:var(--card);">
               <td style="padding:5px 6px;font-weight:700;color:var(--ink);">L2</td>
-              <td colspan="2" style="padding:5px 6px;color:#8a7f79;">Carpark</td>
+              <td style="padding:5px 6px;color:#8a7f79;">Carpark</td>
             </tr>
             <tr style="border-bottom:1px solid var(--div);">
               <td style="padding:5px 6px;font-weight:700;color:var(--ink);">L1</td>
-              <td colspan="2" style="padding:5px 6px;color:#8a7f79;">Carpark</td>
+              <td style="padding:5px 6px;color:#8a7f79;">Carpark</td>
             </tr>
             <tr style="border-bottom:1px solid var(--div);background:var(--card);">
               <td style="padding:5px 6px;font-weight:700;color:var(--ink);">G</td>
-              <td colspan="2" style="padding:5px 6px;color:#8a7f79;">Lobby &amp; Carpark</td>
+              <td style="padding:5px 6px;color:#8a7f79;">Lobby &amp; Carpark</td>
             </tr>
             <tr>
               <td style="padding:5px 6px;font-weight:700;color:var(--ink);">SB</td>
-              <td colspan="2" style="padding:5px 6px;color:#8a7f79;">Carpark</td>
+              <td style="padding:5px 6px;color:#8a7f79;">Carpark</td>
             </tr>
           </tbody>
         </table>
@@ -650,6 +649,23 @@ siteShape.closePath();                                 // line 1: STRAIGHT left
 const baseGeo=new THREE.ExtrudeGeometry(siteShape,{depth:deckY,bevelEnabled:false});
 const base=new THREE.Mesh(baseGeo,podiumMat);
 base.rotation.x=-Math.PI/2;base.position.set(0,deckY,0);scene.add(base);
+// Podium body below deck: L3→G carpark (Y=-16 to 0)
+const podiumBodyGeo=new THREE.ExtrudeGeometry(siteShape,{depth:16,bevelEnabled:false});
+const podiumBodyMat=new THREE.MeshStandardMaterial({color:0x9a9590,roughness:0.95});
+const podiumBody=new THREE.Mesh(podiumBodyGeo,podiumBodyMat);
+podiumBody.rotation.x=-Math.PI/2;podiumBody.position.set(0,0,0);scene.add(podiumBody);
+// SB basement (Y=-24 to -16)
+const sbGeo=new THREE.ExtrudeGeometry(siteShape,{depth:8,bevelEnabled:false});
+const sbMat=new THREE.MeshStandardMaterial({color:0x7a7570,roughness:0.95});
+const sbMesh=new THREE.Mesh(sbGeo,sbMat);
+sbMesh.rotation.x=-Math.PI/2;sbMesh.position.set(0,-16,0);scene.add(sbMesh);
+// Floor slab lines for each podium level
+const floorSlabShape=new THREE.ShapeGeometry(siteShape);
+const slabLineMat=new THREE.MeshStandardMaterial({color:0x6a6560,roughness:1});
+[-4,-8,-12,-16].forEach(y=>{
+  const sl=new THREE.Mesh(new THREE.ShapeGeometry(siteShape),slabLineMat);
+  sl.rotation.x=-Math.PI/2;sl.position.set(0,y,0);scene.add(sl);
+});
 const deckShape=new THREE.Shape();
 deckShape.moveTo(-80,-98);
 deckShape.lineTo(138,-98);

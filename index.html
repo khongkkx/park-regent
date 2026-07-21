@@ -717,7 +717,7 @@ FAC_DATA.forEach(f=>{
   const mat=new THREE.MeshStandardMaterial({color:f.color,roughness:0.45,metalness:0.05,
     transparent:f.h<1.5,opacity:f.h<1.5?0.82:0.92});
   const mesh=new THREE.Mesh(new THREE.BoxGeometry(f.w,f.h,f.d),mat);
-  mesh.position.set(f.x,deckY+f.h/2+0.05,f.z);
+  mesh.position.set(f.x,deckY*2+f.h/2+0.05,f.z);
   mesh.userData={facilityId:f.id,name:f.name,cat:f.cat,desc:f.desc,fw:f.w,fh:f.h,fd:f.d};
   scene.add(mesh);facPickables.push(mesh);
 });

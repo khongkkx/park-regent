@@ -520,22 +520,22 @@ const TOWERS={
     {k:'D1',w:14,top:'42', t:l=>SP.includes(l)?'C3':'D1',dir:FACE_LAKE},
     {k:'D2',w:13,top:'36', t:l=>'D2',dir:FACE_LAKE},
     {k:'D3',w:14,top:'33A',t:l=>(l==='15'||l==='16')?'C4':'D3',dir:FACE_HILL}]},
- B:{rot:-0.16,cx:30,cz:-2,depth:12,face:null,
+ B:{rot:-0.16,cx:30,cz:-2,depth:22,face:null,
    cols:[
-    // N end — F1 spans full width
-    {k:'F1',w:17,cx:0,    zOff:-42,top:'36', t:l=>'F1',dir:FACE_LAKE, f:'Lake, Facilities & TownCenter'},
-    // Row 1 — B2 (lake) | B1 (TC)
-    {k:'B2',w:9, cx:-4.5, zOff:-26,top:'43A',t:l=>'B2',dir:FACE_LAKE, f:'Lake & Facilities'},
-    {k:'B1',w:9, cx:4.5,  zOff:-26,top:'43A',t:l=>'B1',dir:FACE_LAKE, f:'Lake, Facilities & TownCenter'},
-    // Row 2 — A1 (lake) | C1 (TC)
-    {k:'A1',w:9, cx:-6,   zOff:-10,top:'48', t:l=>SP.includes(l)?null:'A1',dir:FACE_LAKE, f:'Lake & Facilities'},
-    {k:'C1',w:12,cx:4.5,  zOff:-10,top:'48', t:l=>'C1',dir:FACE_TC, f:'TownCenter'},
-    // Row 3 — A2 (lake) | C2 (TC)
-    {k:'A2',w:9, cx:-6,   zOff:6,  top:'48', t:l=>'A2',dir:FACE_LAKE, f:'Lake & Facilities'},
-    {k:'C2',w:12,cx:4.5,  zOff:6,  top:'48', t:l=>'C2',dir:FACE_TC, f:'TownCenter'},
-    // S block — D4/C5 (lake) | E2 (TC)
-    {k:'D4',w:14,cx:-7.5, zOff:38, top:'36', t:l=>SP.includes(l)?'C5':'D4',dir:FACE_KL, f:'Lake, Facilities & KL City Centre'},
-    {k:'E2',w:15,cx:7,    zOff:38, top:'36', t:l=>'E2',dir:FACE_HILL, f:'Hills'},
+    // N cap — F1 wide top
+    {k:'F1',w:20,cx:2,    zOff:-56,top:'36', t:l=>'F1',dir:FACE_LAKE, f:'Lake, Facilities & TownCenter'},
+    // Row 1 — B2 (lake/left) | B1 (spine/right)
+    {k:'B2',w:11,cx:-5,   zOff:-34,top:'43A',t:l=>'B2',dir:FACE_LAKE, f:'Lake & Facilities'},
+    {k:'B1',w:11,cx:5,    zOff:-34,top:'43A',t:l=>'B1',dir:FACE_LAKE, f:'Lake, Facilities & TownCenter'},
+    // Row 2 — A1 (lake) | C1 (east arm of L)
+    {k:'A1',w:11,cx:-5,   zOff:-10,top:'48', t:l=>SP.includes(l)?null:'A1',dir:FACE_LAKE, f:'Lake & Facilities'},
+    {k:'C1',w:14,cx:14,   zOff:-10,top:'48', t:l=>'C1',dir:FACE_TC, f:'TownCenter'},
+    // Row 3 — A2 (lake) | C2 (east arm of L)
+    {k:'A2',w:11,cx:-5,   zOff:14, top:'48', t:l=>'A2',dir:FACE_LAKE, f:'Lake & Facilities'},
+    {k:'C2',w:14,cx:14,   zOff:14, top:'48', t:l=>'C2',dir:FACE_TC, f:'TownCenter'},
+    // S block — D4/C5 | E2
+    {k:'D4',w:16,cx:-7,   zOff:54, top:'36', t:l=>SP.includes(l)?'C5':'D4',dir:FACE_KL, f:'Lake, Facilities & KL City Centre'},
+    {k:'E2',w:17,cx:9,    zOff:54, top:'36', t:l=>'E2',dir:FACE_HILL, f:'Hills'},
    ]}
 };
 const CROWN={f:'Lake, Facilities & KL City Centre',dir:FACE_KL};

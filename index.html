@@ -514,13 +514,13 @@ const SP=['15','16','35','36'];
 const STACKSEQ=['1','2','3','3A','5','6','7','8','9'];
 const FACE_LAKE=[-0.15,-1],FACE_HILL=[0.15,1],FACE_TC=[1,-0.25],FACE_KL=[0.8,0.7];
 const TOWERS={
- A:{rot:0.12,cx:-46,cz:14,depth:24,face:'Lake, Facilities & Hill',
+ A:{rot:0.12,cx:-30,cz:32,depth:24,face:'Lake, Facilities & Hill',
    cols:[
     {k:'E1',w:15,top:'43A',t:l=>'E1',dir:FACE_LAKE},
     {k:'D1',w:14,top:'42', t:l=>SP.includes(l)?'C3':'D1',dir:FACE_LAKE},
     {k:'D2',w:13,top:'36', t:l=>'D2',dir:FACE_LAKE},
     {k:'D3',w:14,top:'33A',t:l=>(l==='15'||l==='16')?'C4':'D3',dir:FACE_HILL}]},
- B:{rot:330*Math.PI/180,cx:100,cz:10,depth:22,face:null,
+ B:{rot:-0.15,cx:35,cz:-50,depth:22,face:null,
    cols:[
     // N cap — F1 wide top
     {k:'F1',w:20,cx:2,    zOff:-56,top:'36', t:l=>'F1',dir:FACE_LAKE, f:'Lake, Facilities & TownCenter'},
@@ -594,23 +594,24 @@ const ground=new THREE.Mesh(new THREE.CircleGeometry(950,48),grassMat);
 ground.rotation.x=-Math.PI/2;scene.add(ground);
 function blob(cx,cz,rx,rz,mat,y){const m=new THREE.Mesh(new THREE.CircleGeometry(1,44),mat);
   m.scale.set(rx,rz,1);m.rotation.x=-Math.PI/2;m.position.set(cx,y,cz);return m;}
-scene.add(blob(-10,-165,195,95,lakeMat,0.15));
-scene.add(blob(150,-190,80,55,lakeMat,0.15));
-scene.add(blob(-175,-70,120,90,parkMat,0.1));
-scene.add(blob(120,115,90,60,parkMat,0.1));
+// lake NW of site, park far west
+scene.add(blob(-60,-140,180,85,lakeMat,0.15));
+scene.add(blob(80,-170,70,45,lakeMat,0.15));
+scene.add(blob(-200,-50,110,80,parkMat,0.1));
+scene.add(blob(130,100,80,55,parkMat,0.1));
 const siteShape=new THREE.Shape();
-// shape(x,y): x=world.x, y=world.z (after rotation x=-PI/2)
-// wide at north (y neg), extends far east, tapers to SW tip
-siteShape.moveTo(-95,-130);siteShape.lineTo(-10,-160);siteShape.lineTo(115,-135);
-siteShape.lineTo(185,0);siteShape.lineTo(165,100);
-siteShape.lineTo(55,160);siteShape.lineTo(-85,85);siteShape.closePath();
+// shape(x,y): x=world.x, y=world.z; matches satellite boundary
+// NW(lake edge) → N → NE → E(road) → SE → S(Jalan Residen 2) → SW
+siteShape.moveTo(-85,-110);siteShape.lineTo(-15,-130);siteShape.lineTo(65,-105);
+siteShape.lineTo(110,-20);siteShape.lineTo(105,75);
+siteShape.lineTo(-10,92);siteShape.lineTo(-85,15);siteShape.closePath();
 const baseGeo=new THREE.ExtrudeGeometry(siteShape,{depth:deckY,bevelEnabled:false});
 const base=new THREE.Mesh(baseGeo,podiumMat);
 base.rotation.x=-Math.PI/2;base.position.set(0,deckY,0);scene.add(base);
 const deckShape=new THREE.Shape();
-deckShape.moveTo(-93,-128);deckShape.lineTo(-8,-158);deckShape.lineTo(113,-133);
-deckShape.lineTo(183,2);deckShape.lineTo(163,102);
-deckShape.lineTo(53,158);deckShape.lineTo(-83,83);deckShape.closePath();
+deckShape.moveTo(-83,-108);deckShape.lineTo(-13,-128);deckShape.lineTo(63,-103);
+deckShape.lineTo(108,-18);deckShape.lineTo(103,73);
+deckShape.lineTo(-12,90);deckShape.lineTo(-83,13);deckShape.closePath();
 const deckGeo=new THREE.ShapeGeometry(deckShape);
 const deckTop=new THREE.Mesh(deckGeo,roofGreen);
 deckTop.rotation.x=-Math.PI/2;deckTop.position.set(0,deckY+0.1,0);scene.add(deckTop);
@@ -720,8 +721,8 @@ const hillMat=new THREE.MeshStandardMaterial({color:0x6d8a55,roughness:1});
   const m=new THREE.Mesh(new THREE.SphereGeometry(1,20,14),hillMat);
   m.scale.set(h[2],h[3],h[2]*0.7);m.position.set(h[0],0,h[1]);scene.add(m);});
 /* ===== LABELS ===== */
-const LBL=[[-14,deckY+3,-38,'Infinity Pool · L3A'],[-8,7,-72,'Grand Waterfall Cascades'],
-  [-10,2,-155,'Central Lake'],[-180,4,-70,'The Central Park'],[168,7,60,'ParkCity TownCenter →']];
+const LBL=[[-10,deckY+3,-38,'Infinity Pool · L3A'],[-8,7,-65,'Grand Waterfall Cascades'],
+  [-60,2,-155,'Central Lake'],[-200,4,-50,'The Central Park'],[120,7,50,'ParkCity TownCenter →']];
 const lblEls=LBL.map(l=>{const d=document.createElement('div');d.className='lbl';d.textContent=l[3];
   document.body.appendChild(d);return{el:d,v:new THREE.Vector3(l[0],l[1],l[2])};});
 let showLbl=true;const tmpV=new THREE.Vector3();

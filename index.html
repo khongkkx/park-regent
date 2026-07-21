@@ -533,9 +533,9 @@ const TOWERS={
     // Row 3 — A2 (lake) | C2 (east arm of L)
     {k:'A2',w:11,cx:-5,   zOff:14, top:'48', t:l=>'A2',dir:FACE_LAKE, f:'Lake & Facilities'},
     {k:'C2',w:14,cx:14,   zOff:14, top:'48', t:l=>'C2',dir:FACE_TC, f:'TownCenter'},
-    // S block — D4/C5 | E2
-    {k:'D4',w:16,cx:-7,   zOff:54, top:'36', t:l=>SP.includes(l)?'C5':'D4',dir:FACE_KL, f:'Lake, Facilities & KL City Centre'},
-    {k:'E2',w:17,cx:9,    zOff:54, top:'36', t:l=>'E2',dir:FACE_HILL, f:'Hills'},
+    // S block — D4/C5 (far west = L foot) | E2 (center-east)
+    {k:'D4',w:30,cx:-18,  zOff:54, top:'36', t:l=>SP.includes(l)?'C5':'D4',dir:FACE_KL, f:'Lake, Facilities & KL City Centre'},
+    {k:'E2',w:20,cx:10,   zOff:54, top:'36', t:l=>'E2',dir:FACE_HILL, f:'Hills'},
    ]}
 };
 const CROWN={f:'Lake, Facilities & KL City Centre',dir:FACE_KL};

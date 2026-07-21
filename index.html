@@ -520,7 +520,7 @@ const TOWERS={
     {k:'D1',w:14,top:'42', t:l=>SP.includes(l)?'C3':'D1',dir:FACE_LAKE},
     {k:'D2',w:13,top:'36', t:l=>'D2',dir:FACE_LAKE},
     {k:'D3',w:14,top:'33A',t:l=>(l==='15'||l==='16')?'C4':'D3',dir:FACE_HILL}]},
- B:{rot:-0.15,cx:35,cz:-50,depth:22,face:null,
+ B:{rot:-0.3,cx:42,cz:-45,depth:22,face:null,
    cols:[
     // N cap — F1 wide top
     {k:'F1',w:20,cx:2,    zOff:-56,top:'36', t:l=>'F1',dir:FACE_LAKE, f:'Lake, Facilities & TownCenter'},
@@ -600,18 +600,25 @@ scene.add(blob(80,-170,70,45,lakeMat,0.15));
 scene.add(blob(-200,-50,110,80,parkMat,0.1));
 scene.add(blob(130,100,80,55,parkMat,0.1));
 const siteShape=new THREE.Shape();
-// shape(x,y): x=world.x, y=world.z; matches satellite boundary
-// NW(lake edge) → N → NE → E(road) → SE → S(Jalan Residen 2) → SW
-siteShape.moveTo(-85,-110);siteShape.lineTo(-15,-130);siteShape.lineTo(65,-105);
-siteShape.lineTo(110,-20);siteShape.lineTo(105,75);
-siteShape.lineTo(-10,92);siteShape.lineTo(-85,15);siteShape.closePath();
+// Curved site boundary matching satellite — lake edge is arc, Jalan Residen 2 is curved road
+siteShape.moveTo(-82,-92);                              // NW entrance
+siteShape.quadraticCurveTo(-8,-145,62,-108);            // curved N edge along lake
+siteShape.lineTo(112,-30);                              // NE → E road (Persiran Residen)
+siteShape.lineTo(114,42);                               // E mid
+siteShape.quadraticCurveTo(112,68,95,80);               // SE curve
+siteShape.quadraticCurveTo(38,100,-32,88);              // S along Jalan Residen 2 (curved road)
+siteShape.lineTo(-82,18);                               // SW back up
+siteShape.closePath();
 const baseGeo=new THREE.ExtrudeGeometry(siteShape,{depth:deckY,bevelEnabled:false});
 const base=new THREE.Mesh(baseGeo,podiumMat);
 base.rotation.x=-Math.PI/2;base.position.set(0,deckY,0);scene.add(base);
 const deckShape=new THREE.Shape();
-deckShape.moveTo(-83,-108);deckShape.lineTo(-13,-128);deckShape.lineTo(63,-103);
-deckShape.lineTo(108,-18);deckShape.lineTo(103,73);
-deckShape.lineTo(-12,90);deckShape.lineTo(-83,13);deckShape.closePath();
+deckShape.moveTo(-80,-90);
+deckShape.quadraticCurveTo(-6,-143,60,-106);
+deckShape.lineTo(110,-28);deckShape.lineTo(112,44);
+deckShape.quadraticCurveTo(110,66,93,78);
+deckShape.quadraticCurveTo(36,98,-30,86);
+deckShape.lineTo(-80,16);deckShape.closePath();
 const deckGeo=new THREE.ShapeGeometry(deckShape);
 const deckTop=new THREE.Mesh(deckGeo,roofGreen);
 deckTop.rotation.x=-Math.PI/2;deckTop.position.set(0,deckY+0.1,0);scene.add(deckTop);

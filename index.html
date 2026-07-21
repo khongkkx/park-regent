@@ -539,7 +539,7 @@ const TOWERS={
    ]}
 };
 const CROWN={f:'Lake, Facilities & KL City Centre',dir:FACE_KL};
-const deckY=12;
+const deckY=6;
 const yOf=li=>deckY+3+li*3.2;
 function colValid(tw,ci){const c=TOWERS[tw].cols[ci];const out=[];
   for(let i=0;i<=LI[c.top];i++){if(c.t(LEVELS[i]))out.push(i);}return out;}

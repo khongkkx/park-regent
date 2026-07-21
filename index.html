@@ -514,13 +514,13 @@ const SP=['15','16','35','36'];
 const STACKSEQ=['1','2','3','3A','5','6','7','8','9'];
 const FACE_LAKE=[-0.15,-1],FACE_HILL=[0.15,1],FACE_TC=[1,-0.25],FACE_KL=[0.8,0.7];
 const TOWERS={
- A:{rot:0.12,cx:-30,cz:32,depth:24,face:'Lake, Facilities & Hill',
+ A:{rot:0.12,cx:-38,cz:28,depth:24,face:'Lake, Facilities & Hill',
    cols:[
     {k:'E1',w:15,top:'43A',t:l=>'E1',dir:FACE_LAKE},
     {k:'D1',w:14,top:'42', t:l=>SP.includes(l)?'C3':'D1',dir:FACE_LAKE},
     {k:'D2',w:13,top:'36', t:l=>'D2',dir:FACE_LAKE},
     {k:'D3',w:14,top:'33A',t:l=>(l==='15'||l==='16')?'C4':'D3',dir:FACE_HILL}]},
- B:{rot:-0.3,cx:42,cz:-45,depth:22,face:null,
+ B:{rot:-0.3,cx:75,cz:-10,depth:22,face:null,
    cols:[
     // N cap — F1 wide top
     {k:'F1',w:20,cx:2,    zOff:-56,top:'36', t:l=>'F1',dir:FACE_LAKE, f:'Lake, Facilities & TownCenter'},
@@ -600,24 +600,25 @@ scene.add(blob(80,-170,70,45,lakeMat,0.15));
 scene.add(blob(-200,-50,110,80,parkMat,0.1));
 scene.add(blob(130,100,80,55,parkMat,0.1));
 const siteShape=new THREE.Shape();
-// Curved site boundary matching satellite — lake edge is arc, Jalan Residen 2 is curved road
-siteShape.moveTo(-82,-92);                              // NW entrance
-siteShape.quadraticCurveTo(-8,-145,62,-108);            // curved N edge along lake
-siteShape.lineTo(112,-30);                              // NE → E road (Persiran Residen)
-siteShape.lineTo(114,42);                               // E mid
-siteShape.quadraticCurveTo(112,68,95,80);               // SE curve
-siteShape.quadraticCurveTo(38,100,-32,88);              // S along Jalan Residen 2 (curved road)
-siteShape.lineTo(-82,18);                               // SW back up
+// Curved site boundary — lake arc north, Jalan Residen 2 curves south, extended east for Tower B
+siteShape.moveTo(-82,-92);
+siteShape.quadraticCurveTo(-5,-148,68,-110);   // curved N edge along lake
+siteShape.lineTo(125,-55);                      // NE to E (Persiran Residen road)
+siteShape.lineTo(130,20);                       // E mid — wider east for Tower B
+siteShape.lineTo(125,65);                       // E lower
+siteShape.quadraticCurveTo(110,85,85,90);       // SE curve
+siteShape.quadraticCurveTo(28,105,-32,90);      // S along Jalan Residen 2
+siteShape.lineTo(-82,18);
 siteShape.closePath();
 const baseGeo=new THREE.ExtrudeGeometry(siteShape,{depth:deckY,bevelEnabled:false});
 const base=new THREE.Mesh(baseGeo,podiumMat);
 base.rotation.x=-Math.PI/2;base.position.set(0,deckY,0);scene.add(base);
 const deckShape=new THREE.Shape();
 deckShape.moveTo(-80,-90);
-deckShape.quadraticCurveTo(-6,-143,60,-106);
-deckShape.lineTo(110,-28);deckShape.lineTo(112,44);
-deckShape.quadraticCurveTo(110,66,93,78);
-deckShape.quadraticCurveTo(36,98,-30,86);
+deckShape.quadraticCurveTo(-3,-146,66,-108);
+deckShape.lineTo(123,-53);deckShape.lineTo(128,22);deckShape.lineTo(123,67);
+deckShape.quadraticCurveTo(108,83,83,88);
+deckShape.quadraticCurveTo(26,103,-30,88);
 deckShape.lineTo(-80,16);deckShape.closePath();
 const deckGeo=new THREE.ShapeGeometry(deckShape);
 const deckTop=new THREE.Mesh(deckGeo,roofGreen);
@@ -729,7 +730,7 @@ const hillMat=new THREE.MeshStandardMaterial({color:0x6d8a55,roughness:1});
   m.scale.set(h[2],h[3],h[2]*0.7);m.position.set(h[0],0,h[1]);scene.add(m);});
 /* ===== LABELS ===== */
 const LBL=[[-10,deckY+3,-38,'Infinity Pool · L3A'],[-8,7,-65,'Grand Waterfall Cascades'],
-  [-60,2,-155,'Central Lake'],[-200,4,-50,'The Central Park'],[120,7,50,'ParkCity TownCenter →']];
+  [-60,2,-155,'Central Lake'],[-200,4,-50,'The Central Park'],[165,7,55,'ParkCity TownCenter →']];
 const lblEls=LBL.map(l=>{const d=document.createElement('div');d.className='lbl';d.textContent=l[3];
   document.body.appendChild(d);return{el:d,v:new THREE.Vector3(l[0],l[1],l[2])};});
 let showLbl=true;const tmpV=new THREE.Vector3();

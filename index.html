@@ -231,6 +231,20 @@
   #unitPanel .btns button{flex:1;border:none;font-size:10px;font-weight:700;padding:7px 4px;border-radius:20px;cursor:pointer;}
   #uView{background:var(--clay);color:#fff;}
   #uClose{background:#e6ddd4;color:var(--ink);}
+  #facPanel{position:fixed;z-index:12;display:none;background:var(--paper);
+    border-radius:14px;padding:14px 16px;box-shadow:0 6px 28px rgba(40,30,25,.28);width:252px;
+    transition:opacity .18s ease;pointer-events:auto;}
+  #facPanel::before{content:'';position:absolute;width:10px;height:10px;background:var(--paper);
+    transform:rotate(45deg);z-index:-1;}
+  #facPanel.arrow-left::before{left:-5px;top:50%;margin-top:-5px;box-shadow:-3px 3px 6px rgba(40,30,25,.1);}
+  #facPanel.arrow-right::before{right:-5px;top:50%;margin-top:-5px;box-shadow:3px -3px 6px rgba(40,30,25,.1);}
+  #facPanel.arrow-top::before{top:-5px;left:50%;margin-left:-5px;box-shadow:-3px -3px 6px rgba(40,30,25,.1);}
+  #facPanel.arrow-bottom::before{bottom:-5px;left:50%;margin-left:-5px;box-shadow:3px 3px 6px rgba(40,30,25,.1);}
+  #facPanel .fCat{font-size:9px;letter-spacing:.12em;color:#5d8f4e;font-weight:700;text-transform:uppercase;margin-bottom:4px;}
+  #facPanel .fName{font-family:Georgia,serif;font-size:15px;font-weight:700;color:var(--ink);}
+  #facPanel .fDesc{font-size:10.5px;color:#6d635d;line-height:1.65;margin-top:6px;}
+  #facPanel .fLvl{font-size:9.5px;color:#8a7f79;margin-top:5px;}
+  #facPanel .fClose{width:100%;margin-top:10px;background:#e6ddd4;color:var(--ink);border:none;font-size:10px;font-weight:700;padding:7px 4px;border-radius:20px;cursor:pointer;}
 
   .lbl{position:fixed;z-index:5;transform:translate(-50%,-100%);background:rgba(58,51,48,.82);color:#fff;
     font-size:9.5px;font-weight:600;padding:3px 8px;border-radius:20px;pointer-events:none;white-space:nowrap;}
@@ -536,6 +550,13 @@
   </div>
   <div class="btns"><button id="uView">View from unit</button><button id="uClose">Close</button></div>
 </div>
+<div id="facPanel">
+  <div class="fCat" id="fCat">Facilities</div>
+  <div class="fName" id="fName">Infinity Pool</div>
+  <div class="fLvl">Level 3A · Lakeside Blue</div>
+  <div class="fDesc" id="fDesc"></div>
+  <button class="fClose" id="fClose">Close</button>
+</div>
 <button id="exitView">Exit unit view</button>
 <div id="err">Couldn't load the 3D engine. Check your connection and reopen this file.</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -677,6 +698,29 @@ for(let i=0;i<6;i++){
   const w=new THREE.Mesh(new THREE.BoxGeometry(92-i*4,0.3,4.4),waterMat);
   w.position.set(-8,deckY-(i*2)+0.05,-56-(i*5));scene.add(w);
 }
+/* ===== FACILITIES L3A ===== */
+const FAC_DATA=[
+  {id:'infinityPool',name:'Infinity Pool',cat:'Water Feature',desc:'25m lap pool with panoramic views of Central Lake and the Desa ParkCity skyline. Open daily.',x:-14,z:-38,w:54,d:20,h:1.5,color:0x63c3d6},
+  {id:'poolDeck',name:'Pool Deck',cat:'Recreation',desc:'Sun deck with lounge chairs and shaded cabanas surrounding the Infinity Pool.',x:-10,z:-55,w:62,d:10,h:0.5,color:0xc8baa8},
+  {id:'jacuzzi',name:'Jacuzzi',cat:'Water Feature',desc:'Heated jacuzzi for relaxation, adjacent to the Infinity Pool with lake views.',x:18,z:-37,w:10,d:10,h:1.2,color:0x7ac8da},
+  {id:'kidsPool',name:"Kid's Pool",cat:'Water Feature',desc:'Shallow splash pool with play features, designed for young residents.',x:30,z:-27,w:15,d:12,h:0.8,color:0x8fd0dd},
+  {id:'cadenza',name:'Cadenza Cascades',cat:'Water Feature',desc:'Sculptural water cascade bringing tranquil sounds to the upper deck level.',x:6,z:-70,w:16,d:12,h:4,color:0x8fd0dd},
+  {id:'lawn',name:'Lawn',cat:'Green Space',desc:'Expansive open lawn for picnics, outdoor events, and leisurely strolls.',x:-48,z:-22,w:26,d:22,h:0.4,color:0x7fa25c},
+  {id:'medDeck',name:'Meditation Deck',cat:'Wellness',desc:'Quiet timber deck for yoga and meditation, facing the park and lake views.',x:-64,z:-32,w:16,d:14,h:0.6,color:0xc8b8a0},
+  {id:'verdant',name:'Verdant Walkway',cat:'Green Space',desc:'Tree-lined promenade linking facility zones around the perimeter of the deck.',x:-32,z:-55,w:8,d:28,h:0.4,color:0x88ab60},
+  {id:'residentsClub',name:"Resident's Club",cat:'Club Facilities',desc:'Premium clubhouse complex with Gym · Multipurpose Hall · Private Dining · Mini Theatre · Game Simulator · Changing Rooms',x:55,z:-62,w:46,d:38,h:9,color:0xe0d4c4},
+];
+const facPickables=[];
+const facHLMat=new THREE.MeshBasicMaterial({color:0x4488cc,transparent:true,opacity:0.55});
+const facHL=new THREE.Mesh(new THREE.BoxGeometry(1,1,1),facHLMat);facHL.visible=false;scene.add(facHL);
+FAC_DATA.forEach(f=>{
+  const mat=new THREE.MeshStandardMaterial({color:f.color,roughness:0.45,metalness:0.05,
+    transparent:f.h<1.5,opacity:f.h<1.5?0.82:0.92});
+  const mesh=new THREE.Mesh(new THREE.BoxGeometry(f.w,f.h,f.d),mat);
+  mesh.position.set(f.x,deckY+f.h/2+0.05,f.z);
+  mesh.userData={facilityId:f.id,name:f.name,cat:f.cat,desc:f.desc,fw:f.w,fh:f.h,fd:f.d};
+  scene.add(mesh);facPickables.push(mesh);
+});
 /* ===== TOWERS ===== */
 const pickables=[];
 const SLICE_H=2.85;
@@ -808,8 +852,8 @@ function pick(cx,cy){
   }
   ptr.x=(cx/innerWidth)*2-1;ptr.y=-(cy/innerHeight)*2+1;
   ray.setFromCamera(ptr,camera);
-  const hit=ray.intersectObjects(pickables)[0];
-  if(hit)selectUnit(hit.object);
+  const hit=ray.intersectObjects([...pickables,...facPickables])[0];
+  if(hit){if(hit.object.userData.facilityId)selectFacility(hit.object);else selectUnit(hit.object);}
 }
 el.addEventListener('pointerdown',e=>{if(inView)return;drag=true;px=dx0=e.clientX;py=dy0=e.clientY;el.setPointerCapture(e.pointerId);});
 el.addEventListener('pointermove',e=>{if(!drag||inView)return;
@@ -868,6 +912,7 @@ function clearSelEmissive(){
   }
 }
 function selectUnit(mesh){
+  if(selFac){fPanel.style.display='none';facHL.visible=false;selFac=null;}
   clearSelEmissive();
   const d=mesh.userData;
   const li=d.li;
@@ -876,6 +921,39 @@ function selectUnit(mesh){
   uSlider.min=0;uSlider.max=d.valid.length-1;uSlider.value=d.valid.indexOf(li);
   activeUnit={tower:d.tower,colKey:d.colKey};
   uP.style.display='block';auto=false;syncRot();updateUnit();
+}
+let selFac=null;
+const fPanel=document.getElementById('facPanel');
+const fCatEl=document.getElementById('fCat');
+const fNameEl=document.getElementById('fName');
+const fDescEl=document.getElementById('fDesc');
+document.getElementById('fClose').onclick=()=>{fPanel.style.display='none';facHL.visible=false;selFac=null;};
+function positionFacPanel(mesh){
+  const wp=new THREE.Vector3();mesh.getWorldPosition(wp);
+  const proj=wp.clone().project(camera);
+  const sx=(proj.x*0.5+0.5)*innerWidth,sy=(-proj.y*0.5+0.5)*innerHeight;
+  const pW=fPanel.offsetWidth||252,pH=fPanel.offsetHeight||160,gap=60;
+  const sidebarRight=document.getElementById('sidebar').classList.contains('open')?document.getElementById('sidebar').getBoundingClientRect().right:0;
+  const pL=sidebarRight+8;
+  let left,top,ac;
+  if(sx+gap+pW<innerWidth-8){left=sx+gap;top=Math.max(8,Math.min(sy-pH/2,innerHeight-pH-8));ac='arrow-left';}
+  else if(sx-gap-pW>pL){left=sx-gap-pW;top=Math.max(8,Math.min(sy-pH/2,innerHeight-pH-8));ac='arrow-right';}
+  else if(sy-gap-pH>8){left=Math.max(pL,Math.min(sx-pW/2,innerWidth-pW-8));top=sy-gap-pH;ac='arrow-bottom';}
+  else{left=Math.max(pL,Math.min(sx-pW/2,innerWidth-pW-8));top=Math.min(sy+gap,innerHeight-pH-8);ac='arrow-top';}
+  fPanel.style.left=left+'px';fPanel.style.top=top+'px';
+  fPanel.className='';fPanel.classList.add(ac);
+}
+function selectFacility(mesh){
+  clearSelEmissive();
+  if(sel){uP.style.display='none';hl.visible=false;sel=null;}
+  selFac=mesh;
+  const d=mesh.userData;
+  fCatEl.textContent=d.cat;fNameEl.textContent=d.name;fDescEl.textContent=d.desc;
+  facHL.scale.set(d.fw+2,d.fh+1,d.fd+2);
+  facHL.position.copy(mesh.position);
+  facHL.visible=true;
+  fPanel.style.display='block';auto=false;
+  requestAnimationFrame(()=>positionFacPanel(mesh));
 }
 function selectStack(mesh){
   const d=mesh.userData;

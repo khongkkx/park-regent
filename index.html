@@ -841,14 +841,13 @@ function updateUnit(){
   uLvl.textContent='Level '+lvl;
   const activeColKey=displayColKey;
   const c=(activeColKey==='CR')?null:TOWERS[sel.tower].cols.find(x=>x.k===activeColKey);
-  const w=c?c.w:25,lx=c?c._x:(TOWERS.B.cols[0]._x+TOWERS.B.cols[1]._x)/2,lz=c?(c.zOff||0):0;
-  const T=TOWERS[sel.tower];
-  const rot=T.rot,twX=T.cx,twZ=T.cz;
-  const wx=lx*Math.cos(rot)-lz*Math.sin(rot)+twX;
-  const wz=lx*Math.sin(rot)+lz*Math.cos(rot)+twZ;
+  const w=c?c.w:25;
+  const refMesh=pickables.find(m=>m.userData.tower===sel.tower&&m.userData.colKey===activeColKey)||sel.mesh;
+  const wp=new THREE.Vector3();
+  refMesh.getWorldPosition(wp);
   hl.scale.set(w+1.6,1,TOWERS[sel.tower].depth+4);
-  hl.position.set(wx,yOf(sel.li)-1.4+SLICE_H/2+0.36,wz);
-  hl.rotation.y=rot;
+  hl.position.set(wp.x,yOf(sel.li)-1.4+SLICE_H/2+0.36,wp.z);
+  hl.rotation.y=TOWERS[sel.tower].rot;
   hl.visible=true;
   requestAnimationFrame(positionPanel);
 }

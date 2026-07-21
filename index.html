@@ -601,9 +601,9 @@ scene.add(blob(-200,-50,110,80,parkMat,0.1));
 scene.add(blob(130,100,80,55,parkMat,0.1));
 const siteShape=new THREE.Shape();
 siteShape.moveTo(-82,-92);
-siteShape.bezierCurveTo(-10,-195,175,-150,140,100); // curve: top arc + right side
-siteShape.lineTo(-82,100);                           // line 2: bottom straight
-siteShape.closePath();                               // line 1: left straight
+siteShape.bezierCurveTo(-10,-195,175,-150,140,100); // curve: top+right arc
+siteShape.lineTo(-82,100);  // line 2: STRAIGHT bottom
+siteShape.closePath();      // line 1: STRAIGHT left
 const baseGeo=new THREE.ExtrudeGeometry(siteShape,{depth:deckY,bevelEnabled:false});
 const base=new THREE.Mesh(baseGeo,podiumMat);
 base.rotation.x=-Math.PI/2;base.position.set(0,deckY,0);scene.add(base);

@@ -649,21 +649,16 @@ siteShape.closePath();                                 // line 1: STRAIGHT left
 const baseGeo=new THREE.ExtrudeGeometry(siteShape,{depth:deckY,bevelEnabled:false});
 const base=new THREE.Mesh(baseGeo,podiumMat);
 base.rotation.x=-Math.PI/2;base.position.set(0,deckY,0);scene.add(base);
-// Podium body below deck: L3→G carpark (Y=-16 to 0)
-const podiumBodyGeo=new THREE.ExtrudeGeometry(siteShape,{depth:16,bevelEnabled:false});
-const podiumBodyMat=new THREE.MeshStandardMaterial({color:0x9a9590,roughness:0.95});
+// Podium carpark body: visible between ground (Y=0) and facility deck base (Y=deckY)
+// Uses same shape/rotation as base but starts at Y=0 so it fills the gap below the deck
+const podiumBodyGeo=new THREE.ExtrudeGeometry(siteShape,{depth:deckY,bevelEnabled:false});
+const podiumBodyMat=new THREE.MeshStandardMaterial({color:0x6b6560,roughness:0.95});
 const podiumBody=new THREE.Mesh(podiumBodyGeo,podiumBodyMat);
 podiumBody.rotation.x=-Math.PI/2;podiumBody.position.set(0,0,0);scene.add(podiumBody);
-// SB basement (Y=-24 to -16)
-const sbGeo=new THREE.ExtrudeGeometry(siteShape,{depth:8,bevelEnabled:false});
-const sbMat=new THREE.MeshStandardMaterial({color:0x7a7570,roughness:0.95});
-const sbMesh=new THREE.Mesh(sbGeo,sbMat);
-sbMesh.rotation.x=-Math.PI/2;sbMesh.position.set(0,-16,0);scene.add(sbMesh);
-// Floor slab lines for each podium level
-const floorSlabShape=new THREE.ShapeGeometry(siteShape);
-const slabLineMat=new THREE.MeshStandardMaterial({color:0x6a6560,roughness:1});
-[-4,-8,-12,-16].forEach(y=>{
-  const sl=new THREE.Mesh(new THREE.ShapeGeometry(siteShape),slabLineMat);
+// Floor slab bands on podium (visible from side)
+const slabLineMat=new THREE.MeshStandardMaterial({color:0x4a4540,roughness:1});
+[deckY*0.33,deckY*0.66].forEach(y=>{
+  const sl=new THREE.Mesh(new THREE.ExtrudeGeometry(siteShape,{depth:0.4,bevelEnabled:false}),slabLineMat);
   sl.rotation.x=-Math.PI/2;sl.position.set(0,y,0);scene.add(sl);
 });
 const deckShape=new THREE.Shape();

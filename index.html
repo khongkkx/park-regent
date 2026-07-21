@@ -520,17 +520,23 @@ const TOWERS={
     {k:'D1',w:14,top:'42', t:l=>SP.includes(l)?'C3':'D1',dir:FACE_LAKE},
     {k:'D2',w:13,top:'36', t:l=>'D2',dir:FACE_LAKE},
     {k:'D3',w:14,top:'33A',t:l=>(l==='15'||l==='16')?'C4':'D3',dir:FACE_HILL}]},
- B:{rot:-0.16,cx:30,cz:-2,depth:24,face:null,
+ B:{rot:-0.16,cx:30,cz:-2,depth:12,face:null,
    cols:[
-    {k:'D4',w:14,top:'36', t:l=>SP.includes(l)?'C5':'D4',dir:FACE_KL, f:'Lake, Facilities & KL City Centre'},
-    {k:'E2',w:15,top:'36', t:l=>'E2',dir:FACE_HILL, f:'Hills'},
-    {k:'A2',w:9, top:'48', t:l=>'A2',dir:FACE_LAKE, f:'Lake & Facilities'},
-    {k:'A1',w:9, top:'48', t:l=>SP.includes(l)?null:'A1',dir:FACE_LAKE, f:'Lake & Facilities'},
-    {k:'B2',w:9, top:'43A',t:l=>'B2',dir:FACE_LAKE, f:'Lake & Facilities', zOff:26},
-    {k:'F1',w:17,top:'36', t:l=>'F1',dir:FACE_LAKE, f:'Lake, Facilities & TownCenter'},
-    {k:'B1',w:9, top:'43A',t:l=>'B1',dir:FACE_LAKE, f:'Lake, Facilities & TownCenter'},
-    {k:'C1',w:12,top:'48', t:l=>'C1',dir:FACE_TC, f:'TownCenter'},
-    {k:'C2',w:12,top:'48', t:l=>'C2',dir:FACE_TC, f:'TownCenter'}]}
+    // N end — F1 spans full width
+    {k:'F1',w:17,cx:0,    zOff:-42,top:'36', t:l=>'F1',dir:FACE_LAKE, f:'Lake, Facilities & TownCenter'},
+    // Row 1 — B2 (lake) | B1 (TC)
+    {k:'B2',w:9, cx:-4.5, zOff:-26,top:'43A',t:l=>'B2',dir:FACE_LAKE, f:'Lake & Facilities'},
+    {k:'B1',w:9, cx:4.5,  zOff:-26,top:'43A',t:l=>'B1',dir:FACE_LAKE, f:'Lake, Facilities & TownCenter'},
+    // Row 2 — A1 (lake) | C1 (TC)
+    {k:'A1',w:9, cx:-6,   zOff:-10,top:'48', t:l=>SP.includes(l)?null:'A1',dir:FACE_LAKE, f:'Lake & Facilities'},
+    {k:'C1',w:12,cx:4.5,  zOff:-10,top:'48', t:l=>'C1',dir:FACE_TC, f:'TownCenter'},
+    // Row 3 — A2 (lake) | C2 (TC)
+    {k:'A2',w:9, cx:-6,   zOff:6,  top:'48', t:l=>'A2',dir:FACE_LAKE, f:'Lake & Facilities'},
+    {k:'C2',w:12,cx:4.5,  zOff:6,  top:'48', t:l=>'C2',dir:FACE_TC, f:'TownCenter'},
+    // S block — D4/C5 (lake) | E2 (TC)
+    {k:'D4',w:14,cx:-7.5, zOff:38, top:'36', t:l=>SP.includes(l)?'C5':'D4',dir:FACE_KL, f:'Lake, Facilities & KL City Centre'},
+    {k:'E2',w:15,cx:7,    zOff:38, top:'36', t:l=>'E2',dir:FACE_HILL, f:'Hills'},
+   ]}
 };
 const CROWN={f:'Lake, Facilities & KL City Centre',dir:FACE_KL};
 const deckY=12;
@@ -543,7 +549,7 @@ function stackNoOf(tw,colKey,lvl){
   if(tw==='A'){TOWERS.A.cols.forEach(c=>{if(li<=LI[c.top]&&c.t(lvl))occ.push(c.k);});}
   else{
     if(li>=LI['37'])occ.push('CR');
-    TOWERS.B.cols.forEach((c,i)=>{if(i<2&&li>=LI['37'])return;
+    TOWERS.B.cols.forEach((c)=>{if((c.k==='D4'||c.k==='E2')&&li>=LI['37'])return;
       if(li<=LI[c.top]&&c.t(lvl))occ.push(c.k);});
   }
   const idx=occ.indexOf(colKey);return idx<0?null:STACKSEQ[idx];
@@ -621,13 +627,14 @@ function buildTower(tw){
   const total=T.cols.reduce((s,c)=>s+c.w,0);let x=-total/2;
   T.cols.forEach((c,ci)=>{
     const zOff=c.zOff||0;
+    const colX=c.cx!==undefined?c.cx:x+c.w/2;
     const valid=colValid(tw,ci);
     const h=yOf(valid[valid.length-1])+3.2-deckY;
     const midType=c.t(LEVELS[valid[Math.floor(valid.length/2)]])||'A1';
     const mat=getColMat(tw+'_'+c.k,midType[0]);
     const shell=new THREE.Mesh(new THREE.BoxGeometry(c.w-0.8,h,T.depth),
       new THREE.MeshStandardMaterial({color:TYPECOL[midType[0]],roughness:0.5,metalness:0.08,transparent:true,opacity:0.18}));
-    shell.position.set(x+c.w/2,deckY+h/2,zOff);
+    shell.position.set(colX,deckY+h/2,zOff);
     g.add(shell);
     valid.forEach(li=>{
       const lvl=LEVELS[li];
@@ -635,47 +642,47 @@ function buildTower(tw){
       const fMat=getColMat(tw+'_'+c.k+'_'+typeChar,typeChar);
       const sm=new THREE.Mesh(sliceGeom,fMat);
       sm.scale.set(c.w-0.8,1,T.depth);
-      sm.position.set(x+c.w/2,yOf(li)-1.4+SLICE_H/2+0.36,zOff);
+      sm.position.set(colX,yOf(li)-1.4+SLICE_H/2+0.36,zOff);
       sm.userData={tower:tw,colKey:c.k,li,valid,mat:fMat};
       g.add(sm);pickables.push(sm);
     });
     const n=valid.length;
     const sl=new THREE.InstancedMesh(new THREE.BoxGeometry(c.w-0.2,0.35,T.depth+1.6),slabMat,n);
     const m4=new THREE.Matrix4();
-    valid.forEach((li,i)=>{m4.setPosition(x+c.w/2,yOf(li)-1.4,zOff);sl.setMatrixAt(i,m4);});
+    valid.forEach((li,i)=>{m4.setPosition(colX,yOf(li)-1.4,zOff);sl.setMatrixAt(i,m4);});
     g.add(sl);
     const rg=new THREE.Mesh(new THREE.BoxGeometry(c.w-2,0.7,T.depth-3),roofGreen);
-    rg.position.set(x+c.w/2,deckY+h+0.4,zOff);g.add(rg);
-    c._x=x+c.w/2;x+=c.w;
+    rg.position.set(colX,deckY+h+0.4,zOff);g.add(rg);
+    c._x=colX;if(c.cx===undefined)x+=c.w;
   });
   return g;
 }
 const gA=buildTower('A'),gB=buildTower('B');
 (function(){
-  const c0=TOWERS.B.cols[0],c1=TOWERS.B.cols[1];
-  const w=(c0.w+c1.w)-4,cx=(c0._x+c1._x)/2;
+  const c0=TOWERS.B.cols.find(c=>c.k==='D4'),c1=TOWERS.B.cols.find(c=>c.k==='E2');
+  const w=(c0.w+c1.w)-4,cx=(c0._x+c1._x)/2,cz=(c0.zOff||0);
   const y0=yOf(LI['37'])-1.6,y1=yOf(LI['53'])+3.2;
   const crownBaseMat=new THREE.MeshStandardMaterial({color:TYPECOL.F,roughness:0.5,metalness:0.08,transparent:true,opacity:0.18});
   const shell=new THREE.Mesh(new THREE.BoxGeometry(w,y1-y0,22),crownBaseMat);
-  shell.position.set(cx,(y0+y1)/2,0);gB.add(shell);
+  shell.position.set(cx,(y0+y1)/2,cz);gB.add(shell);
   crownValid.forEach(li=>{
     const fMat=getColMat('B_CR_F','F');
     const sm=new THREE.Mesh(sliceGeom,fMat);
     sm.scale.set(w,1,22);
-    sm.position.set(cx,yOf(li)-1.4+SLICE_H/2+0.36,0);
+    sm.position.set(cx,yOf(li)-1.4+SLICE_H/2+0.36,cz);
     sm.userData={tower:'B',colKey:'CR',li,valid:crownValid,mat:fMat};
     gB.add(sm);pickables.push(sm);
   });
   const n=crownValid.length;
   const sl=new THREE.InstancedMesh(new THREE.BoxGeometry(w+0.6,0.35,23.6),slabMat,n);
   const m4=new THREE.Matrix4();
-  crownValid.forEach((li,i)=>{m4.setPosition(cx,yOf(li)-1.4,0);sl.setMatrixAt(i,m4);});
+  crownValid.forEach((li,i)=>{m4.setPosition(cx,yOf(li)-1.4,cz);sl.setMatrixAt(i,m4);});
   gB.add(sl);
   const rg=new THREE.Mesh(new THREE.BoxGeometry(w-3,0.7,18),roofGreen);
-  rg.position.set(cx,y1+0.4,0);gB.add(rg);
+  rg.position.set(cx,y1+0.4,cz);gB.add(rg);
   [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(cn=>{
     const p=new THREE.Mesh(new THREE.BoxGeometry(1.2,8,1.2),finMat);
-    p.position.set(cx+cn[0]*w/2,y1+4,cn[1]*9);gB.add(p);});
+    p.position.set(cx+cn[0]*w/2,y1+4,cz+cn[1]*9);gB.add(p);});
 })();
 const hlMat=new THREE.MeshBasicMaterial({color:0xff8a5c,transparent:true,opacity:0.72});
 const hl=new THREE.Mesh(new THREE.BoxGeometry(1,SLICE_H,1),hlMat);hl.visible=false;scene.add(hl);

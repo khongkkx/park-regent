@@ -600,26 +600,17 @@ scene.add(blob(80,-170,70,45,lakeMat,0.15));
 scene.add(blob(-200,-50,110,80,parkMat,0.1));
 scene.add(blob(130,100,80,55,parkMat,0.1));
 const siteShape=new THREE.Shape();
-// Curved site boundary — lake arc north, Jalan Residen 2 curves south, extended east for Tower B
 siteShape.moveTo(-82,-92);
-siteShape.quadraticCurveTo(-5,-148,68,-110);   // curved N edge along lake
-siteShape.lineTo(125,-55);                      // NE to E (Persiran Residen road)
-siteShape.lineTo(130,20);                       // E mid — wider east for Tower B
-siteShape.lineTo(125,65);                       // E lower
-siteShape.quadraticCurveTo(110,85,85,90);       // SE curve
-siteShape.quadraticCurveTo(28,105,-32,90);      // S along Jalan Residen 2
-siteShape.lineTo(-82,18);
-siteShape.closePath();
+siteShape.bezierCurveTo(-10,-195,175,-150,140,100); // curve: top arc + right side
+siteShape.lineTo(-82,100);                           // line 2: bottom straight
+siteShape.closePath();                               // line 1: left straight
 const baseGeo=new THREE.ExtrudeGeometry(siteShape,{depth:deckY,bevelEnabled:false});
 const base=new THREE.Mesh(baseGeo,podiumMat);
 base.rotation.x=-Math.PI/2;base.position.set(0,deckY,0);scene.add(base);
 const deckShape=new THREE.Shape();
 deckShape.moveTo(-80,-90);
-deckShape.quadraticCurveTo(-3,-146,66,-108);
-deckShape.lineTo(123,-53);deckShape.lineTo(128,22);deckShape.lineTo(123,67);
-deckShape.quadraticCurveTo(108,83,83,88);
-deckShape.quadraticCurveTo(26,103,-30,88);
-deckShape.lineTo(-80,16);deckShape.closePath();
+deckShape.bezierCurveTo(-10,-193,173,-148,138,98);
+deckShape.lineTo(-80,98);deckShape.closePath();
 const deckGeo=new THREE.ShapeGeometry(deckShape);
 const deckTop=new THREE.Mesh(deckGeo,roofGreen);
 deckTop.rotation.x=-Math.PI/2;deckTop.position.set(0,deckY+0.1,0);scene.add(deckTop);
